@@ -1,0 +1,458 @@
+/* ============================================
+   OTB Games Hub — Launcher Styles
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: var(--otb-font-body);
+    background: var(--otb-bg-primary);
+    color: var(--otb-text);
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Subtle animated gradient background */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(233, 69, 96, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(74, 143, 63, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(155, 89, 182, 0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    animation: hub-bg-shift 20s ease-in-out infinite alternate;
+}
+
+@keyframes hub-bg-shift {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+#hub {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============ SPLASH ============ */
+.hub-splash-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    animation: hub-icon-bounce 2s ease-in-out infinite;
+}
+
+@keyframes hub-icon-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* ============ HEADER ============ */
+.hub-header {
+    background: linear-gradient(135deg, var(--otb-bg-tertiary), var(--otb-bg-secondary));
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.hub-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hub-brand-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.hub-brand-name {
+    font-family: var(--otb-font-heading);
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.hub-player {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.hub-player-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hub-player-name {
+    font-family: var(--otb-font-heading);
+    font-size: 1.1rem;
+    color: var(--otb-coin);
+}
+
+.hub-player-level {
+    font-family: var(--otb-font-body);
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.hub-xp-bar {
+    width: 140px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.hub-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--otb-xp), #c084fc);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.hub-stats-row {
+    display: flex;
+    gap: 12px;
+}
+
+.hub-stat {
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+}
+
+/* ============ SECTIONS ============ */
+.hub-section {
+    padding: 20px 24px;
+}
+
+.hub-section-title {
+    font-family: var(--otb-font-heading);
+    font-size: 1.15rem;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+}
+
+/* ============ GAMES GRID ============ */
+.hub-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.hub-game-card {
+    background: var(--otb-bg-secondary);
+    border: 2px solid var(--otb-border);
+    border-radius: var(--otb-radius-lg);
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.hub-game-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--otb-coin);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.15);
+}
+
+.hub-game-card:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.hub-game-banner {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hub-game-emoji {
+    font-size: 2.5rem;
+    z-index: 1;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+}
+
+.thinkfast-banner {
+    background: url('../assets/banner-thinkfast.png') center/cover no-repeat;
+}
+
+.wordmine-banner {
+    background: url('../assets/banner-wordmine.png') center/cover no-repeat;
+}
+
+.coming-soon-banner {
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    opacity: 0.6;
+}
+
+.hub-lock-icon {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.hub-game-info {
+    padding: 12px 16px;
+}
+
+.hub-game-title {
+    font-family: var(--otb-font-heading);
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.hub-game-desc {
+    font-family: var(--otb-font-body);
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+    margin-bottom: 8px;
+}
+
+.hub-game-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hub-game-tag {
+    font-family: var(--otb-font-body);
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tag-math {
+    background: rgba(155, 89, 182, 0.2);
+    color: #c084fc;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.tag-reading {
+    background: rgba(46, 204, 113, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.hub-game-locked {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.hub-game-offline {
+    opacity: 0.6;
+    filter: grayscale(0.3);
+}
+
+.hub-game-offline .hub-game-banner::after {
+    content: '📡 Offline';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-family: var(--otb-font-body);
+    font-size: 0.6rem;
+    background: rgba(0,0,0,0.6);
+    color: var(--otb-warning);
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.hub-game-banner {
+    position: relative;
+}
+
+/* ============ ACHIEVEMENTS ============ */
+.hub-achievements {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hub-achievement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--otb-border);
+    border-radius: var(--otb-radius-md);
+    padding: 10px 14px;
+}
+
+.hub-achievement-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.hub-achievement-info {
+    flex: 1;
+}
+
+.hub-achievement-name {
+    font-family: var(--otb-font-heading);
+    font-size: 0.8rem;
+    color: var(--otb-coin);
+}
+
+.hub-achievement-desc {
+    font-family: var(--otb-font-body);
+    font-size: 0.65rem;
+    color: var(--otb-text-muted);
+    margin-top: 2px;
+}
+
+.hub-achievement-source {
+    font-family: var(--otb-font-body);
+    font-size: 0.55rem;
+    color: var(--otb-text-dim);
+    background: rgba(255,255,255,0.06);
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.hub-empty-state {
+    font-family: var(--otb-font-body);
+    font-size: 0.85rem;
+    color: var(--otb-text-dim);
+    text-align: center;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--otb-radius-md);
+    border: 1px dashed var(--otb-border);
+}
+
+/* ============ PROGRESS ============ */
+.hub-progress-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.hub-progress-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--otb-border);
+    border-radius: var(--otb-radius-md);
+    padding: 12px 16px;
+}
+
+.hub-progress-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.hub-progress-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hub-progress-label {
+    font-family: var(--otb-font-heading);
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.hub-progress-pct {
+    font-family: var(--otb-font-body);
+    font-size: 0.7rem;
+    color: var(--otb-coin);
+    font-weight: 700;
+}
+
+.hub-total-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--otb-border);
+}
+
+.hub-total-stat {
+    font-family: var(--otb-font-body);
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+}
+
+/* ============ FOOTER ============ */
+.hub-footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--otb-border);
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 600px) {
+    .hub-games-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .hub-header {
+        padding: 12px 16px;
+    }
+    .hub-section {
+        padding: 16px;
+    }
+}
+
+@media (min-width: 1100px) {
+    .hub-games-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============ ANIMATIONS ============ */
+.hub-game-card {
+    animation: hub-card-in 0.4s ease-out both;
+}
+
+.hub-game-card:nth-child(1) { animation-delay: 0.1s; }
+.hub-game-card:nth-child(2) { animation-delay: 0.2s; }
+.hub-game-card:nth-child(3) { animation-delay: 0.3s; }
+.hub-game-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes hub-card-in {
+    from { opacity: 0; transform: translateY(16px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
