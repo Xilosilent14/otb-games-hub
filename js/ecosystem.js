@@ -31,6 +31,16 @@ const OTBEcosystem = (() => {
             totalPlayTime: 0,
             gamesPlayed: {},
             globalAchievements: [],
+            // Shop & Customization
+            purchasedItems: [],
+            equippedItems: { avatar: 'default', nameColor: 'gold', title: '', hubTheme: 'default' },
+            // Daily Challenges
+            dailyChallenges: null,
+            dailyChallengeDate: null,
+            // Weekly stats snapshots (for report card)
+            weeklyHistory: [],
+            // Pet
+            pet: { mood: 100, lastFed: null, name: 'Buddy', hatches: 0 },
             createdAt: Date.now(),
             updatedAt: Date.now()
         };

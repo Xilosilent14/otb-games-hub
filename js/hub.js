@@ -1,7 +1,11 @@
 /* ============================================
-   OTB Games Hub — Main Controller
+   OTB Games Hub — Main Controller v2.0
+   Integrates: Shop, Trophies, Challenges,
+   Progress Map, Animations, Report Card, Pet
    ============================================ */
 (() => {
+    let currentTab = 'home';
+
     function init() {
         // Set game card URLs from config
         document.querySelectorAll('[data-game]').forEach(card => {
@@ -19,10 +23,77 @@
                 splash.style.display = 'none';
                 document.getElementById('hub').style.display = 'block';
                 loadProfile();
-                loadAchievements();
+                loadHomeTab();
+                applyTheme();
                 checkGameAvailability();
+                HubReportCard.takeSnapshot();
+                checkForCelebrations();
             }, 500);
         }, 1800);
+
+        // Tab navigation
+        document.querySelectorAll('.hub-nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+    }
+
+    function switchTab(tabId) {
+        currentTab = tabId;
+
+        // Update nav
+        document.querySelectorAll('.hub-nav-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tabId);
+        });
+
+        // Update content
+        document.querySelectorAll('.hub-tab-content').forEach(c => {
+            c.classList.toggle('active', c.id === 'tab-' + tabId);
+        });
+
+        // Load tab content
+        if (tabId === 'home') loadHomeTab();
+        else if (tabId === 'trophies') loadTrophies();
+        else if (tabId === 'shop') loadShop();
+        else if (tabId === 'journey') loadJourney();
+        else if (tabId === 'pet') loadPet();
+        else if (tabId === 'report') loadReport();
+    }
+
+    function loadHomeTab() {
+        // Daily challenges
+        const challengeEl = document.getElementById('daily-challenges');
+        if (challengeEl) challengeEl.innerHTML = HubChallenges.renderChallenges();
+    }
+
+    function loadTrophies() {
+        const el = document.getElementById('trophy-room');
+        if (el) el.innerHTML = HubTrophies.renderTrophyRoom();
+    }
+
+    function loadShop() {
+        const el = document.getElementById('coin-shop');
+        if (el) {
+            el.innerHTML = HubShop.renderShop();
+            HubShop.bindShopEvents(el);
+        }
+    }
+
+    function loadJourney() {
+        const el = document.getElementById('progress-map');
+        if (el) el.innerHTML = HubProgressMap.renderProgressMap();
+    }
+
+    function loadPet() {
+        const el = document.getElementById('pet-area');
+        if (el) {
+            el.innerHTML = HubPet.renderPet();
+            HubPet.bindPetEvents(el);
+        }
+    }
+
+    function loadReport() {
+        const el = document.getElementById('report-card-area');
+        if (el) el.innerHTML = HubReportCard.renderReportCard();
     }
 
     function checkGameAvailability() {
@@ -50,6 +121,24 @@
         const nameEl = document.getElementById('player-name');
         if (profile.playerName) nameEl.textContent = profile.playerName;
 
+        // Avatar
+        const avatarEl = document.getElementById('player-avatar');
+        if (avatarEl) avatarEl.textContent = HubShop.getAvatarEmoji();
+
+        // Name color
+        const eq = HubShop.getEquipped();
+        if (eq.nameColor === 'rainbow') {
+            nameEl.classList.add('rainbow');
+            nameEl.style.color = '';
+        } else {
+            nameEl.classList.remove('rainbow');
+            nameEl.style.color = eq.nameColor || 'var(--otb-coin)';
+        }
+
+        // Title
+        const titleEl = document.getElementById('player-title');
+        if (titleEl) titleEl.textContent = eq.title || '';
+
         document.getElementById('player-level').textContent = `Lv. ${level.level}`;
         document.getElementById('xp-fill').style.width = (level.progress * 100) + '%';
         document.getElementById('coins-display').textContent = `🪙 ${profile.coins}`;
@@ -69,53 +158,48 @@
         document.getElementById('games-played').textContent = summary.gamesPlayed + ' game' + (summary.gamesPlayed !== 1 ? 's' : '');
     }
 
-    function loadAchievements() {
-        const container = document.getElementById('achievements-list');
-        const achievements = [];
-
-        // Pull achievements from each game's localStorage
-        try {
-            const tfSave = localStorage.getItem('thinkfast_progress');
-            if (tfSave) {
-                const tf = JSON.parse(tfSave);
-                if (tf.achievements) {
-                    tf.achievements.forEach(a => {
-                        achievements.push({ ...a, source: 'Think Fast', icon: '🏎️' });
-                    });
-                }
-            }
-        } catch (e) { /* ignore */ }
-
-        try {
-            const wmSave = localStorage.getItem('wordmine_progress');
-            if (wmSave) {
-                const wm = JSON.parse(wmSave);
-                if (wm.achievements) {
-                    wm.achievements.forEach(id => {
-                        achievements.push({ id, name: id, source: 'Word Mine', icon: '⛏️' });
-                    });
-                }
-            }
-        } catch (e) { /* ignore */ }
-
-        if (achievements.length === 0) {
-            container.innerHTML = '<div class="hub-empty-state">Play some games to earn achievements!</div>';
-            return;
+    function applyTheme() {
+        const eq = HubShop.getEquipped();
+        // Remove all theme classes
+        document.body.classList.remove('theme-space', 'theme-ocean', 'theme-forest', 'theme-lava', 'theme-candy');
+        if (eq.hubTheme && eq.hubTheme !== 'default') {
+            document.body.classList.add('theme-' + eq.hubTheme);
         }
-
-        // Show last 5 achievements
-        const recent = achievements.slice(-5).reverse();
-        container.innerHTML = recent.map(a => `
-            <div class="hub-achievement">
-                <span class="hub-achievement-icon">${a.icon || '⭐'}</span>
-                <div class="hub-achievement-info">
-                    <div class="hub-achievement-name">${a.name || a.id}</div>
-                    <div class="hub-achievement-desc">${a.desc || ''}</div>
-                </div>
-                <span class="hub-achievement-source">${a.source}</span>
-            </div>
-        `).join('');
     }
+
+    function checkForCelebrations() {
+        const streak = OTBEcosystem.checkDailyStreak();
+        if (streak.isNew && streak.streak > 1) {
+            setTimeout(() => {
+                HubAnimations.fireStreak(streak.streak);
+                HubAnimations.showToast(`${streak.streak} day streak!`, '🔥');
+            }, 800);
+        }
+    }
+
+    // Global refresh functions for sub-modules to call
+    window.refreshHub = function() {
+        loadProfile();
+        applyTheme();
+    };
+
+    window.refreshShop = function() {
+        loadShop();
+        loadProfile();
+    };
+
+    window.refreshPet = function() {
+        loadPet();
+    };
+
+    // Re-check challenges when returning from a game (page gets focus)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            loadProfile();
+            if (currentTab === 'home') loadHomeTab();
+            HubChallenges.checkProgress();
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', init);
 })();

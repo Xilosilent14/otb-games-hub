@@ -1,19 +1,28 @@
-// OTB Games Hub — Service Worker
-const CACHE_NAME = 'otb-hub-v3';
+// OTB Games Hub — Service Worker v2.0
+const CACHE_NAME = 'otb-hub-v4';
 const ASSETS = [
     './',
     './index.html',
     './css/hub.css',
+    './css/hub-features.css',
     './css/shared/design-system.css',
     './css/shared/fonts/fredoka-one.woff2',
     './css/shared/fonts/nunito-regular.woff2',
     './css/shared/fonts/nunito-semibold.woff2',
     './js/otb-config.js',
     './js/ecosystem.js',
+    './js/animations.js',
+    './js/shop.js',
+    './js/trophies.js',
+    './js/challenges.js',
+    './js/progressmap.js',
+    './js/reportcard.js',
+    './js/pet.js',
     './js/hub.js',
     './assets/otb-logo.png',
     './assets/banner-thinkfast.png',
     './assets/banner-wordmine.png',
+    './assets/banner-rhythmblast.png',
     './manifest.json'
 ];
 

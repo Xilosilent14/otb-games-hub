@@ -12,7 +12,8 @@ const OTBConfig = (() => {
         hub: 'https://otbgames.shutterbuzzent.com',
         'think-fast': 'https://thinkfast.shutterbuzzent.com',
         'word-mine': 'https://wordmine.shutterbuzzent.com',
-        'rhythm-blast': 'https://rhythmblast.shutterbuzzent.com'
+        'rhythm-blast': 'https://rhythmblast.shutterbuzzent.com',
+        'creature-cards': 'https://creaturecards.shutterbuzzent.com'
     };
 
     // Local dev URLs
@@ -20,7 +21,8 @@ const OTBConfig = (() => {
         hub: 'http://localhost:8082',
         'think-fast': 'http://localhost:8080',
         'word-mine': 'http://localhost:8081',
-        'rhythm-blast': 'http://localhost:8083'
+        'rhythm-blast': 'http://localhost:8083',
+        'creature-cards': 'http://localhost:8084'
     };
 
     const urls = isLocal ? LOCAL_URLS : PRODUCTION_URLS;
