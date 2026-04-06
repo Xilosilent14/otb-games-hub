@@ -210,6 +210,10 @@ body::before {
     background: url('../assets/banner-wordmine.png') center/cover no-repeat;
 }
 
+.rhythmblast-banner {
+    background: url('../assets/banner-rhythmblast.png') center/cover no-repeat;
+}
+
 .coming-soon-banner {
     background: linear-gradient(135deg, #333 0%, #222 100%);
     opacity: 0.6;
