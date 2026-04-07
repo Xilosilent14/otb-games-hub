@@ -218,6 +218,24 @@ body::before {
     background: url('../assets/banner-creaturecards.png') center/cover no-repeat;
 }
 
+.potionlab-banner {
+    background: radial-gradient(ellipse at 40% 40%, #1a0a3e 0%, #0d0d2b 80%);
+    position: relative;
+    overflow: hidden;
+}
+.potionlab-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 70% 30%, rgba(255,117,24,0.25) 0%, transparent 50%),
+        radial-gradient(circle at 30% 70%, rgba(155,89,182,0.15) 0%, transparent 50%);
+}
+
+.spidey-banner {
+    background: radial-gradient(ellipse at 40% 40%, #e23636 0%, #1565C0 80%);
+}
+
 .coming-soon-banner {
     background: linear-gradient(135deg, #333 0%, #222 100%);
     opacity: 0.6;
@@ -459,6 +477,8 @@ body::before {
 .hub-game-card:nth-child(2) { animation-delay: 0.2s; }
 .hub-game-card:nth-child(3) { animation-delay: 0.3s; }
 .hub-game-card:nth-child(4) { animation-delay: 0.4s; }
+.hub-game-card:nth-child(5) { animation-delay: 0.5s; }
+.hub-game-card:nth-child(6) { animation-delay: 0.6s; }
 
 @keyframes hub-card-in {
     from { opacity: 0; transform: translateY(16px) scale(0.95); }

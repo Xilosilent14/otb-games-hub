@@ -68,6 +68,19 @@ const HubTrophies = (() => {
                 { id: 'score-1000', name: 'High Scorer', desc: 'Score 1000 in a song', icon: '🎯' },
             ]
         },
+        // Spidey Academy achievements
+        'spidey-academy': {
+            icon: '🕷️',
+            name: 'Spidey Academy',
+            color: '#e23636',
+            trophies: [
+                { id: 'spidey-first', name: 'First Web', desc: 'Complete your first activity', icon: '🕸️' },
+                { id: 'spidey-colors', name: 'Color Expert', desc: 'Learn all 6 colors', icon: '🎨' },
+                { id: 'spidey-shapes', name: 'Shape Master', desc: 'Learn all 6 shapes', icon: '🔷' },
+                { id: 'spidey-stickers-10', name: 'Sticker Star', desc: 'Earn 10 stickers', icon: '⭐' },
+                { id: 'spidey-champion', name: 'Spidey Champion', desc: 'Earn all 30 stickers', icon: '🏆' },
+            ]
+        },
         // Hub / Cross-game achievements
         'hub': {
             icon: '🎮',
@@ -121,6 +134,14 @@ const HubTrophies = (() => {
             }
         } catch (e) { /* ignore */ }
 
+        // Spidey Academy
+        try {
+            const sa = JSON.parse(localStorage.getItem('spidey_academy_progress') || '{}');
+            if (sa.achievements) {
+                earned['spidey-academy'] = new Set(sa.achievements.map(a => typeof a === 'string' ? a : a.id));
+            }
+        } catch (e) { /* ignore */ }
+
         // Hub achievements (check conditions dynamically)
         earned['hub'] = new Set();
         const profile = OTBEcosystem.getProfile();
@@ -155,7 +176,7 @@ const HubTrophies = (() => {
             <h2 class="trophy-title">Trophy Room</h2>
         </div>`;
 
-        const gameOrder = ['hub', 'thinkfast', 'wordmine', 'rhythmblast'];
+        const gameOrder = ['hub', 'thinkfast', 'wordmine', 'rhythmblast', 'spidey-academy'];
 
         for (const gameId of gameOrder) {
             const game = REGISTRY[gameId];
