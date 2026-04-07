@@ -23,6 +23,8 @@ const ASSETS = [
     './assets/banner-thinkfast.png',
     './assets/banner-wordmine.png',
     './assets/banner-rhythmblast.png',
+    './assets/banner-potionlab.png',
+    './assets/banner-spidey.png',
     './manifest.json'
 ];
 
