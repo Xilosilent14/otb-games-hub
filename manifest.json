@@ -1,7 +1,7 @@
 {
-    "name": "OTB Games",
-    "short_name": "OTB Games",
-    "description": "Oliver's Learning Arcade - Educational games for kids",
+    "name": "Blake Boys Gaming",
+    "short_name": "BBG",
+    "description": "The Blake Boys Arcade - Educational games for kids",
     "start_url": "/",
     "display": "standalone",
     "orientation": "landscape",

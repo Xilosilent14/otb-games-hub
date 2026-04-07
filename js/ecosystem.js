@@ -1,15 +1,16 @@
 /**
- * OTB Ecosystem — Shared cross-game profile and mastery tracking
+ * BBG Ecosystem — Shared cross-game profile and mastery tracking
+ * (Blake Boys Gaming)
  *
  * Each game stores its own save data separately. This library manages
- * a shared profile (otb_shared_profile) that aggregates data across games,
+ * a shared profile (bbg_shared_profile) that aggregates data across games,
  * enabling cross-game mastery, unified XP, daily streaks, and coins.
  *
  * Usage: Include this script before your game's main.js, then call
  * OTBEcosystem methods alongside your game-specific progress tracking.
  */
 const OTBEcosystem = (() => {
-    const PROFILE_KEY = 'otb_shared_profile';
+    const PROFILE_KEY = 'bbg_shared_profile';
     const VERSION = 1;
 
     // XP curve: each level requires more XP
@@ -31,22 +32,16 @@ const OTBEcosystem = (() => {
             totalPlayTime: 0,
             gamesPlayed: {},
             globalAchievements: [],
-            // Shop & Customization
-            purchasedItems: [],
-            equippedItems: { avatar: 'default', nameColor: 'gold', title: '', hubTheme: 'default' },
-            // Daily Challenges
-            dailyChallenges: null,
-            dailyChallengeDate: null,
-            // Weekly stats snapshots (for report card)
-            weeklyHistory: [],
-            // Pet
-            pet: { mood: 100, lastFed: null, name: 'Buddy', hatches: 0 },
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
     }
 
     function _load() {
+        // Migration: copy old OTB profile to new BBG key
+        if (!localStorage.getItem('bbg_shared_profile') && localStorage.getItem('otb_shared_profile')) {
+            localStorage.setItem('bbg_shared_profile', localStorage.getItem('otb_shared_profile'));
+        }
         try {
             const raw = localStorage.getItem(PROFILE_KEY);
             if (!raw) return _getDefault();
@@ -54,7 +49,7 @@ const OTBEcosystem = (() => {
             // Merge with defaults for forward compat
             return Object.assign(_getDefault(), data);
         } catch (e) {
-            console.warn('[OTB Ecosystem] Failed to load profile, using defaults:', e);
+            console.warn('[BBG Ecosystem] Failed to load profile, using defaults:', e);
             return _getDefault();
         }
     }
@@ -64,7 +59,7 @@ const OTBEcosystem = (() => {
             profile.updatedAt = Date.now();
             localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
         } catch (e) {
-            console.warn('[OTB Ecosystem] Failed to save profile:', e);
+            console.warn('[BBG Ecosystem] Failed to save profile:', e);
         }
     }
 

@@ -1,5 +1,5 @@
-// OTB Games Hub — Service Worker v2.0
-const CACHE_NAME = 'otb-hub-v4';
+// Blake Boys Gaming Hub — Service Worker v3.0
+const CACHE_NAME = 'bbg-hub-v5';
 const ASSETS = [
     './',
     './index.html',
@@ -19,7 +19,7 @@ const ASSETS = [
     './js/reportcard.js',
     './js/pet.js',
     './js/hub.js',
-    './assets/otb-logo.png',
+    './assets/bbg-logo.png',
     './assets/banner-thinkfast.png',
     './assets/banner-wordmine.png',
     './assets/banner-rhythmblast.png',
