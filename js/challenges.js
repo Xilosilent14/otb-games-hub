@@ -190,30 +190,22 @@ const HubChallenges = (() => {
         const allDone = challenges.every(c => c.completed);
         const hoursLeft = _getResetHours();
 
-        let html = `<div class="challenge-timer">Resets in ${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}</div>`;
-        html += `<div class="challenges-header">
+        let html = `<div class="challenges-header">
             <h3 class="challenges-title">Daily Challenges</h3>
-            ${allDone ? '<span class="challenges-complete">All Done! 🎉</span>' : ''}
+            <span class="challenge-timer-inline">Resets in ${hoursLeft}h</span>
+            ${allDone ? '<span class="challenges-complete">All Done!</span>' : ''}
         </div>
-        <div class="challenges-list">`;
+        <div class="challenges-pills">`;
 
         for (const c of challenges) {
             const progress = _getProgressForChallenge(c, data.snapshot || {});
             const pct = c.completed ? 100 : (progress ? Math.max(0, Math.floor((progress.current / progress.target) * 100)) : 0);
 
-            html += `<div class="challenge-card ${c.completed ? 'completed' : ''}">
-                <div class="challenge-icon">${c.icon}</div>
-                <div class="challenge-info">
-                    <div class="challenge-title">${c.text}</div>
-                    <div class="challenge-progress">
-                        <div class="challenge-progress-fill" style="width:${pct}%"></div>
-                    </div>
-                    ${progress && !c.completed ? `<div style="font-size:0.65rem;color:var(--otb-text-muted);margin-top:2px;">${Math.max(0, progress.current)}/${progress.target}</div>` : ''}
-                </div>
-                ${c.completed
-                    ? '<div class="challenge-check">✅</div>'
-                    : `<div class="challenge-reward">🪙 ${c.reward}</div>`
-                }
+            html += `<div class="challenge-pill ${c.completed ? 'completed' : ''}" title="${c.text}">
+                <span class="challenge-pill-icon">${c.icon}</span>
+                <span class="challenge-pill-text">${c.text}</span>
+                <span class="challenge-pill-reward">${c.completed ? '✅' : '🪙' + c.reward}</span>
+                <div class="challenge-pill-progress" style="width:${pct}%"></div>
             </div>`;
         }
 

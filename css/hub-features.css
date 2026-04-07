@@ -8,7 +8,7 @@
 .hub-nav {
     display: flex;
     gap: 4px;
-    padding: 8px 16px;
+    padding: 4px 12px;
     background: rgba(0, 0, 0, 0.2);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -53,7 +53,7 @@
 
 .hub-tab-content {
     display: none;
-    padding: 16px 20px;
+    padding: 4px 8px;
     animation: tabFadeIn 0.3s ease;
 }
 
@@ -304,105 +304,94 @@
     50% { box-shadow: 0 0 12px rgba(255,215,0,0.15); }
 }
 
-/* ============ DAILY CHALLENGES ============ */
+/* ============ DAILY CHALLENGES (compact pill row) ============ */
 .challenges-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .challenges-title {
     font-family: var(--otb-font-heading);
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: #fff;
+}
+
+.challenge-timer-inline {
+    font-family: var(--otb-font-body);
+    font-size: 0.65rem;
+    color: var(--otb-text-muted);
 }
 
 .challenges-complete {
     font-family: var(--otb-font-body);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--otb-success);
     font-weight: 700;
 }
 
-.challenges-list {
+.challenges-pills {
     display: flex;
-    flex-direction: column;
-    gap: 0;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
+.challenges-pills::-webkit-scrollbar { display: none; }
 
-.challenge-card {
-    background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,52,96,0.6));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-left: 4px solid var(--challenge-color, #a855f7);
-    border-radius: 12px;
-    padding: 16px 20px;
+.challenge-pill {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 16px;
-    transition: all 0.2s;
-    margin-bottom: 8px;
-}
-.challenge-card:nth-child(1) { --challenge-color: #e94560; }
-.challenge-card:nth-child(2) { --challenge-color: #a855f7; }
-.challenge-card:nth-child(3) { --challenge-color: #4a8f3f; }
-.challenge-card:nth-child(4) { --challenge-color: #f59e0b; }
-.challenge-card:nth-child(5) { --challenge-color: #4A90D9; }
-.challenge-card:hover {
-    background: linear-gradient(135deg, rgba(22,33,62,1), rgba(15,52,96,0.8));
-    border-left-width: 5px;
-    transform: translateX(2px);
-}
-.challenge-card.completed {
-    border-color: var(--otb-coin);
-    border-left-color: var(--otb-coin);
-    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(22,33,62,0.9));
-}
-.challenge-icon {
-    font-size: 2rem;
-    width: 48px;
-    height: 48px;
-    text-align: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,52,96,0.6));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 6px 12px;
+    white-space: nowrap;
     flex-shrink: 0;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    line-height: 48px;
-}
-.challenge-info { flex: 1; }
-.challenge-title {
-    font-family: var(--otb-font-heading);
-    color: var(--otb-text);
-    font-size: 0.95rem;
-}
-.challenge-progress {
-    margin-top: 6px;
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
     overflow: hidden;
+    transition: all 0.2s;
+    min-width: 0;
 }
-.challenge-progress-fill {
-    height: 100%;
+.challenge-pill:nth-child(1) { border-left: 3px solid #e94560; }
+.challenge-pill:nth-child(2) { border-left: 3px solid #a855f7; }
+.challenge-pill:nth-child(3) { border-left: 3px solid #4a8f3f; }
+
+.challenge-pill.completed {
+    border-color: var(--otb-coin);
+    background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(22,33,62,0.9));
+}
+
+.challenge-pill-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.challenge-pill-text {
+    font-family: var(--otb-font-body);
+    font-size: 0.7rem;
+    color: var(--otb-text);
+    font-weight: 600;
+}
+.challenge-pill-reward {
+    font-family: var(--otb-font-heading);
+    font-size: 0.7rem;
+    color: var(--otb-coin);
+    flex-shrink: 0;
+}
+.challenge-pill-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
     background: linear-gradient(90deg, var(--game-accent, #e94560), var(--otb-coin));
-    border-radius: 3px;
+    border-radius: 0 0 20px 20px;
     transition: width 0.5s ease;
 }
-.challenge-reward {
-    font-family: var(--otb-font-heading);
-    color: var(--otb-coin);
-    font-size: 0.9rem;
-    flex-shrink: 0;
-}
-.challenge-check {
-    color: var(--otb-success);
-    font-size: 1.5rem;
-}
-.challenge-timer {
-    text-align: center;
-    color: var(--otb-text-muted);
-    font-size: 0.8rem;
-    margin-bottom: 12px;
-}
+
+/* Keep old classes for backwards compat but hide */
+.challenge-timer { display: none; }
 
 /* ============ JOURNEY MAP (winding path) ============ */
 .journey-header { text-align: center; margin-bottom: 20px; }
@@ -972,13 +961,7 @@ body.theme-candy::before {
 
 /* ============ HUB GREETING ============ */
 .hub-greeting {
-    font-family: var(--otb-font-heading);
-    color: var(--otb-text);
-    font-size: 1.4rem;
-    padding: 16px 20px 4px;
-    background: linear-gradient(90deg, rgba(255,215,0,0.08), transparent);
-    border-radius: 12px 12px 0 0;
-    margin-bottom: 4px;
+    display: none;
 }
 
 /* ============ GAME NEW BADGE ============ */

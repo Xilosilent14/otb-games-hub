@@ -115,13 +115,10 @@
             <button class="hub-nav-tab" data-tab="report" role="tab" aria-selected="false" aria-controls="tab-report"><span class="tab-icon" aria-hidden="true">📊</span> Report</button>
         </nav>
 
-        <!-- Tab: Home (Games + Challenges + Progress) -->
+        <!-- Tab: Home (Games + Challenges) -->
         <div class="hub-tab-content active" id="tab-home" role="tabpanel" aria-labelledby="tab-home">
-            <!-- Daily Challenges -->
-            <section class="hub-section" id="daily-challenges"></section>
-
-            <!-- Games Grid -->
-            <section class="hub-section">
+            <!-- Games Grid (hero element — first thing kids see) -->
+            <section class="hub-section hub-section-games">
                 <h2 class="hub-section-title">My Games</h2>
                 <div class="hub-games-grid">
                     <a href="#" class="hub-game-card" id="card-thinkfast" data-game="think-fast">
@@ -205,37 +202,8 @@
                 </div>
             </section>
 
-            <!-- Learning Progress -->
-            <section class="hub-section">
-                <h2 class="hub-section-title">Learning Progress</h2>
-                <div class="hub-progress-grid">
-                    <div class="hub-progress-card">
-                        <div class="hub-progress-icon">🔢</div>
-                        <div class="hub-progress-info">
-                            <span class="hub-progress-label">Math</span>
-                            <div class="otb-progress">
-                                <div class="otb-progress-fill" id="math-progress" style="width: 0%"></div>
-                            </div>
-                            <span class="hub-progress-pct" id="math-accuracy">0%</span>
-                        </div>
-                    </div>
-                    <div class="hub-progress-card">
-                        <div class="hub-progress-icon">📖</div>
-                        <div class="hub-progress-info">
-                            <span class="hub-progress-label">Reading</span>
-                            <div class="otb-progress">
-                                <div class="otb-progress-fill" id="reading-progress" style="width: 0%"></div>
-                            </div>
-                            <span class="hub-progress-pct" id="reading-accuracy">0%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="hub-total-stats">
-                    <span class="hub-total-stat" id="total-answers">0 answers</span>
-                    <span class="hub-total-stat" id="total-playtime">0 min played</span>
-                    <span class="hub-total-stat" id="games-played">0 games</span>
-                </div>
-            </section>
+            <!-- Daily Challenges (compact pill row below games) -->
+            <section class="hub-section hub-section-challenges" id="daily-challenges"></section>
         </div>
 
         <!-- Tab: Trophy Room -->
@@ -272,7 +240,7 @@
         <!-- Footer -->
         <footer class="hub-footer">
             <span class="otb-about-text">Blake Boys Gaming</span>
-            <span class="otb-about-version">Hub v2.4</span>
+            <span class="otb-about-version">Hub v2.5</span>
         </footer>
     </div>
 

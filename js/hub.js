@@ -666,13 +666,10 @@
     }
 
     function loadHomeTab() {
-        // Add greeting above daily challenges
+        // Render daily challenges (compact pill row, no greeting banner)
         const challengeEl = document.getElementById('daily-challenges');
         if (challengeEl) {
-            const profile = typeof OTBEcosystem !== 'undefined' ? OTBEcosystem.getProfile() : {};
-            const name = profile.playerName || 'Player';
-            const greeting = getGreeting(name);
-            challengeEl.innerHTML = `<div class="hub-greeting">${greeting}</div>` + HubChallenges.renderChallenges();
+            challengeEl.innerHTML = HubChallenges.renderChallenges();
         }
 
         // Add NEW badges to potion-lab and spidey-academy cards
@@ -784,18 +781,24 @@
         document.getElementById('coins-display').textContent = `🪙 ${profile.coins}`;
         document.getElementById('streak-display').textContent = `🔥 ${streak.streak} day${streak.streak !== 1 ? 's' : ''}`;
 
-        // Progress bars
+        // Progress bars (only if elements exist, moved to Report tab)
         const mathPct = Math.round(summary.mathAccuracy * 100);
         const readPct = Math.round(summary.readingAccuracy * 100);
-        document.getElementById('math-progress').style.width = mathPct + '%';
-        document.getElementById('math-accuracy').textContent = mathPct + '%';
-        document.getElementById('reading-progress').style.width = readPct + '%';
-        document.getElementById('reading-accuracy').textContent = readPct + '%';
+        const mathEl = document.getElementById('math-progress');
+        if (mathEl) {
+            mathEl.style.width = mathPct + '%';
+            document.getElementById('math-accuracy').textContent = mathPct + '%';
+            document.getElementById('reading-progress').style.width = readPct + '%';
+            document.getElementById('reading-accuracy').textContent = readPct + '%';
+        }
 
-        // Total stats
-        document.getElementById('total-answers').textContent = summary.totalAnswers + ' answers';
-        document.getElementById('total-playtime').textContent = Math.round(summary.totalPlayTime / 60) + ' min played';
-        document.getElementById('games-played').textContent = summary.gamesPlayed + ' game' + (summary.gamesPlayed !== 1 ? 's' : '');
+        // Total stats (only if elements exist)
+        const totalEl = document.getElementById('total-answers');
+        if (totalEl) {
+            totalEl.textContent = summary.totalAnswers + ' answers';
+            document.getElementById('total-playtime').textContent = Math.round(summary.totalPlayTime / 60) + ' min played';
+            document.getElementById('games-played').textContent = summary.gamesPlayed + ' game' + (summary.gamesPlayed !== 1 ? 's' : '');
+        }
     }
 
     function applyTheme() {
