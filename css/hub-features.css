@@ -40,9 +40,11 @@
 }
 
 .hub-nav-tab.active {
-    background: var(--otb-bg-tertiary);
-    color: var(--otb-coin);
-    border-color: var(--otb-coin);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.15), inset 0 0 8px rgba(255, 215, 0, 0.05);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
 .hub-nav-tab .tab-icon {
@@ -330,8 +332,9 @@
 }
 
 .challenge-card {
-    background: linear-gradient(135deg, rgba(22,33,62,0.8), rgba(15,52,96,0.5));
+    background: linear-gradient(135deg, rgba(22,33,62,0.9), rgba(15,52,96,0.6));
     border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid var(--challenge-color, #a855f7);
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
@@ -340,15 +343,30 @@
     transition: all 0.2s;
     margin-bottom: 8px;
 }
+.challenge-card:nth-child(1) { --challenge-color: #e94560; }
+.challenge-card:nth-child(2) { --challenge-color: #a855f7; }
+.challenge-card:nth-child(3) { --challenge-color: #4a8f3f; }
+.challenge-card:nth-child(4) { --challenge-color: #f59e0b; }
+.challenge-card:nth-child(5) { --challenge-color: #4A90D9; }
+.challenge-card:hover {
+    background: linear-gradient(135deg, rgba(22,33,62,1), rgba(15,52,96,0.8));
+    border-left-width: 5px;
+    transform: translateX(2px);
+}
 .challenge-card.completed {
     border-color: var(--otb-coin);
-    background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(22,33,62,0.8));
+    border-left-color: var(--otb-coin);
+    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(22,33,62,0.9));
 }
 .challenge-icon {
-    font-size: 1.8rem;
+    font-size: 2rem;
     width: 48px;
+    height: 48px;
     text-align: center;
     flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    line-height: 48px;
 }
 .challenge-info { flex: 1; }
 .challenge-title {
@@ -956,8 +974,11 @@ body.theme-candy::before {
 .hub-greeting {
     font-family: var(--otb-font-heading);
     color: var(--otb-text);
-    font-size: 1.3rem;
-    padding: 16px 20px 0;
+    font-size: 1.4rem;
+    padding: 16px 20px 4px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.08), transparent);
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 4px;
 }
 
 /* ============ GAME NEW BADGE ============ */
