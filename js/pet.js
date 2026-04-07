@@ -1,5 +1,6 @@
 /* ============================================
    OTB Games Hub — Virtual Pet / Mascot
+   Growth stages, tricks, mood hearts, accessories
    ============================================ */
 const HubPet = (() => {
     const PET_KEY = 'otb_pet_state';
@@ -14,6 +15,15 @@ const HubPet = (() => {
     ];
 
     const PET_BODIES = ['🐱', '🐶', '🐰', '🐼', '🦊', '🐸', '🐧', '🦉'];
+
+    const GROWTH_STAGES = [
+        { min: 0,  name: 'Baby',  label: 'Just hatched!', size: '2.5rem' },
+        { min: 10, name: 'Kid',   label: 'Growing up!',   size: '3rem' },
+        { min: 30, name: 'Teen',  label: 'Getting strong!', size: '3.5rem' },
+        { min: 60, name: 'Adult', label: 'Fully grown!',  size: '4rem' },
+    ];
+
+    const TRICKS = ['pet-trick-spin', 'pet-trick-bounce', 'pet-trick-wiggle', 'pet-trick-dance'];
 
     const THOUGHTS = {
         sad: [
@@ -49,7 +59,6 @@ const HubPet = (() => {
     };
 
     function _getState() {
-        const profile = OTBEcosystem.getProfile();
         let pet;
         try { pet = JSON.parse(localStorage.getItem(PET_KEY)); } catch (e) { pet = null; }
         if (!pet) {
@@ -60,15 +69,29 @@ const HubPet = (() => {
                 lastFed: null,
                 lastPlayed: null,
                 totalFed: 0,
-                hatched: Date.now()
+                totalPlayed: 0,
+                hatched: Date.now(),
+                equippedAccessory: null
             };
             localStorage.setItem(PET_KEY, JSON.stringify(pet));
         }
+        // Migration: ensure totalPlayed exists
+        if (typeof pet.totalPlayed !== 'number') pet.totalPlayed = 0;
+        if (!pet.equippedAccessory) pet.equippedAccessory = null;
         return pet;
     }
 
     function _saveState(pet) {
         localStorage.setItem(PET_KEY, JSON.stringify(pet));
+    }
+
+    function getGrowthStage(pet) {
+        const total = (pet.totalFed || 0) + (pet.totalPlayed || 0);
+        let stage = GROWTH_STAGES[0];
+        for (const s of GROWTH_STAGES) {
+            if (total >= s.min) stage = s;
+        }
+        return stage;
     }
 
     function getMood(moodValue) {
@@ -84,9 +107,8 @@ const HubPet = (() => {
         const pet = _getState();
         const now = Date.now();
         const profile = OTBEcosystem.getProfile();
-        const summary = OTBEcosystem.getSummary();
 
-        // Decay: lose 1 mood per hour of not playing (max 2 points per check)
+        // Decay: lose 1 mood per hour of not playing (max 15 points per check)
         if (pet.lastPlayed) {
             const hoursSince = (now - pet.lastPlayed) / (1000 * 60 * 60);
             if (hoursSince > 1) {
@@ -98,7 +120,6 @@ const HubPet = (() => {
         const lastPlay = profile.lastPlayDate;
         const today = new Date().toISOString().slice(0, 10);
         if (lastPlay === today) {
-            // Played today: mood boost
             pet.mood = Math.min(100, pet.mood + 5);
             pet.lastPlayed = now;
         }
@@ -114,7 +135,6 @@ const HubPet = (() => {
 
     function feedPet() {
         const pet = _getState();
-        const profile = OTBEcosystem.getProfile();
 
         // Costs 5 coins to feed
         const result = OTBEcosystem.spendCoins(5);
@@ -125,13 +145,14 @@ const HubPet = (() => {
         pet.totalFed = (pet.totalFed || 0) + 1;
         _saveState(pet);
 
-        return { success: true, newMood: pet.mood };
+        return { success: true, newMood: pet.mood, trick: TRICKS[Math.floor(Math.random() * TRICKS.length)] };
     }
 
     function playWithPet() {
         const pet = _getState();
         pet.mood = Math.min(100, pet.mood + 8);
         pet.lastPlayed = Date.now();
+        pet.totalPlayed = (pet.totalPlayed || 0) + 1;
         _saveState(pet);
         return pet.mood;
     }
@@ -148,10 +169,31 @@ const HubPet = (() => {
         _saveState(pet);
     }
 
+    function equipAccessory(accId) {
+        const pet = _getState();
+        pet.equippedAccessory = accId;
+        _saveState(pet);
+    }
+
+    function getEquippedAccessory() {
+        const pet = _getState();
+        return pet.equippedAccessory;
+    }
+
     function getThought(mood) {
         const moodInfo = getMood(mood);
         const thoughts = THOUGHTS[moodInfo.name] || THOUGHTS.okay;
         return thoughts[Math.floor(Math.random() * thoughts.length)];
+    }
+
+    function _moodHearts(moodPct) {
+        const filled = Math.round(moodPct / 20); // 0-5 hearts
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+            if (i < filled) html += '<span class="pet-heart-filled">&#10084;&#65039;</span>';
+            else html += '<span class="pet-heart-empty">&#9825;</span>';
+        }
+        return html;
     }
 
     function renderPet() {
@@ -160,6 +202,14 @@ const HubPet = (() => {
         const thought = getThought(pet.mood);
         const profile = OTBEcosystem.getProfile();
         const coins = profile.coins || 0;
+        const stage = getGrowthStage(pet);
+
+        // Accessory display
+        let accessoryEmoji = '';
+        if (pet.equippedAccessory) {
+            const accItem = (typeof HubShop !== 'undefined' ? HubShop.CATALOG : []).find(i => i.id === pet.equippedAccessory);
+            if (accItem) accessoryEmoji = accItem.emoji;
+        }
 
         // Animation class based on mood
         let animClass = 'pet-idle';
@@ -172,17 +222,15 @@ const HubPet = (() => {
                 <span class="pet-thought">${thought}</span>
             </div>
 
-            <div class="pet-character ${animClass}">
-                <div class="pet-body">${pet.body}</div>
+            <div class="pet-character ${animClass}" id="pet-character">
+                <div class="pet-body" style="font-size:${stage.size}">${pet.body}${accessoryEmoji ? `<span class="pet-accessory">${accessoryEmoji}</span>` : ''}</div>
                 <div class="pet-face">${moodInfo.emoji}</div>
             </div>
 
             <div class="pet-info">
                 <div class="pet-name">${pet.name}</div>
-                <div class="pet-mood-bar">
-                    <div class="pet-mood-fill" style="width:${pet.mood}%;background:${moodInfo.bg}"></div>
-                </div>
-                <div class="pet-mood-label">${moodInfo.label}</div>
+                <div class="pet-stage">${stage.name} - ${stage.label}</div>
+                <div class="pet-mood-hearts">${_moodHearts(pet.mood)}</div>
             </div>
 
             <div class="pet-actions">
@@ -211,6 +259,16 @@ const HubPet = (() => {
         return html;
     }
 
+    function _doTrick(container, trickClass) {
+        const charEl = container.querySelector('#pet-character');
+        if (!charEl) return;
+        charEl.classList.remove(...TRICKS);
+        // Force reflow
+        void charEl.offsetWidth;
+        charEl.classList.add(trickClass);
+        setTimeout(() => charEl.classList.remove(trickClass), 1000);
+    }
+
     function bindPetEvents(container) {
         const feedBtn = container.querySelector('.pet-btn-feed');
         const playBtn = container.querySelector('.pet-btn-play');
@@ -222,8 +280,12 @@ const HubPet = (() => {
                 const result = feedPet();
                 if (result.success) {
                     HubAnimations.showToast('Yum! Your pet feels better!', '🍎');
-                    if (typeof refreshPet === 'function') refreshPet();
-                    if (typeof refreshHub === 'function') refreshHub();
+                    // Do a random trick
+                    if (result.trick) _doTrick(container, result.trick);
+                    setTimeout(() => {
+                        if (typeof refreshPet === 'function') refreshPet();
+                        if (typeof refreshHub === 'function') refreshHub();
+                    }, 1000);
                 } else {
                     HubAnimations.showToast(result.reason, '😿');
                 }
@@ -234,7 +296,6 @@ const HubPet = (() => {
             playBtn.addEventListener('click', () => {
                 playWithPet();
                 HubAnimations.showToast('Your pet had fun!', '🎾');
-                // Little confetti burst
                 HubAnimations.confetti(1500);
                 if (typeof refreshPet === 'function') refreshPet();
             });
@@ -274,6 +335,9 @@ const HubPet = (() => {
         feedPet,
         playWithPet,
         getMood,
+        getGrowthStage,
+        equipAccessory,
+        getEquippedAccessory,
         PET_BODIES
     };
 })();

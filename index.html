@@ -7,6 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a1a2e">
     <title>Blake Boys Gaming</title>
+    <link rel="icon" type="image/png" href="assets/bbg-logo.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/shared/design-system.css">
     <link rel="stylesheet" href="css/hub.css">
@@ -16,11 +17,43 @@
     <!-- Splash Screen -->
     <div id="splash" class="otb-splash">
         <div class="otb-splash-badge">Blake Boys Gaming</div>
-        <img src="assets/bbg-logo.png" alt="Blake Boys Gaming" style="width:120px;height:120px;border-radius:20px;">
+        <img src="assets/bbg-logo.png" alt="Blake Boys Gaming" style="width:160px;height:160px;border-radius:20px;">
         <div class="otb-splash-title">BLAKE BOYS GAMING</div>
         <div class="otb-splash-subtitle">The Blake Boys Arcade</div>
         <div class="otb-splash-loader">
             <div class="otb-splash-loader-fill"></div>
+        </div>
+    </div>
+
+    <!-- Profile Selection -->
+    <div id="profile-select" style="display:none;">
+        <div class="profile-select-header">
+            <img src="assets/bbg-logo.png" alt="BBG" class="profile-select-logo">
+            <h1 class="profile-select-title">Who's Playing?</h1>
+        </div>
+        <div class="profile-cards" id="profile-cards"></div>
+        <button class="otb-btn otb-btn-small profile-add-btn" id="add-profile-btn">+ Add Player</button>
+    </div>
+
+    <!-- Add Player Modal -->
+    <div id="add-player-modal" class="add-player-overlay" style="display:none;">
+        <div class="add-player-card">
+            <h2 class="add-player-title">New Player</h2>
+            <input type="text" id="new-player-name" class="add-player-input" placeholder="Enter name..." maxlength="20" autocomplete="off">
+            <div class="add-player-avatars" id="avatar-picker">
+                <button class="avatar-option selected" data-avatar="\u{1F60E}">\u{1F60E}</button>
+                <button class="avatar-option" data-avatar="\u{1F9B8}">\u{1F9B8}</button>
+                <button class="avatar-option" data-avatar="\u{1F680}">\u{1F680}</button>
+                <button class="avatar-option" data-avatar="\u{1F47E}">\u{1F47E}</button>
+                <button class="avatar-option" data-avatar="\u{1F431}">\u{1F431}</button>
+                <button class="avatar-option" data-avatar="\u{1F525}">\u{1F525}</button>
+                <button class="avatar-option" data-avatar="\u2B50">\u2B50</button>
+                <button class="avatar-option" data-avatar="\u{1F308}">\u{1F308}</button>
+            </div>
+            <div class="add-player-actions">
+                <button class="otb-btn otb-btn-primary" id="create-player-btn">Create!</button>
+                <button class="otb-btn otb-btn-small" id="cancel-player-btn">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -36,8 +69,9 @@
                 <div class="hub-player-info">
                     <div class="hub-avatar" id="player-avatar">😎</div>
                     <div>
-                        <span class="hub-player-name" id="player-name">Oliver</span>
+                        <span class="hub-player-name" id="player-name">Player</span>
                         <span class="hub-player-level" id="player-level">Lv. 1</span>
+                        <button class="hub-profile-switch" id="switch-profile-btn" title="Switch player">Switch</button>
                         <div class="hub-player-title" id="player-title"></div>
                     </div>
                 </div>
@@ -218,7 +252,7 @@
         <!-- Footer -->
         <footer class="hub-footer">
             <span class="otb-about-text">Blake Boys Gaming</span>
-            <span class="otb-about-version">Hub v2.1</span>
+            <span class="otb-about-version">Hub v2.3</span>
         </footer>
     </div>
 

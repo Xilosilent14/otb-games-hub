@@ -1,4 +1,104 @@
 /**
+ * BBG Profile Manager — Multi-player profile switching
+ * Manages multiple player profiles (Oliver, Asher, etc.) with separate
+ * localStorage keys for each player's ecosystem data.
+ */
+const ProfileManager = (() => {
+    const PROFILES_KEY = 'bbg_profiles';
+    const ACTIVE_KEY = 'bbg_active_profile';
+
+    function getProfiles() {
+        try {
+            return JSON.parse(localStorage.getItem(PROFILES_KEY)) || [];
+        } catch { return []; }
+    }
+
+    function saveProfiles(profiles) {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+    }
+
+    function getActiveProfileId() {
+        return localStorage.getItem(ACTIVE_KEY) || null;
+    }
+
+    function setActiveProfile(id) {
+        localStorage.setItem(ACTIVE_KEY, id);
+    }
+
+    function createProfile(name, avatar) {
+        const profiles = getProfiles();
+        const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (profiles.find(p => p.id === id)) return null; // already exists
+        const profile = { id, name, avatar: avatar || '\u{1F60E}', createdAt: Date.now() };
+        profiles.push(profile);
+        saveProfiles(profiles);
+        // Initialize empty profile data
+        localStorage.setItem('bbg_profile_' + id, JSON.stringify({
+            version: 1, playerName: name, globalXP: 0, globalLevel: 1,
+            coins: 0, totalCoinsEarned: 0, mathMastery: {}, readingMastery: {},
+            dailyStreak: 0, lastPlayDate: null, totalPlayTime: 0,
+            gamesPlayed: {}, globalAchievements: [],
+            createdAt: Date.now(), updatedAt: Date.now()
+        }));
+        return profile;
+    }
+
+    function getProfileKey() {
+        const id = getActiveProfileId();
+        return id ? 'bbg_profile_' + id : 'bbg_shared_profile';
+    }
+
+    function getActiveProfile() {
+        const id = getActiveProfileId();
+        if (!id) return null;
+        return getProfiles().find(p => p.id === id) || null;
+    }
+
+    // Migration: if no profiles exist but old data does, create Oliver + Asher
+    function migrateIfNeeded() {
+        const profiles = getProfiles();
+        if (profiles.length > 0) return;
+
+        const oldData = localStorage.getItem('bbg_shared_profile') || localStorage.getItem('otb_shared_profile');
+        if (oldData) {
+            // Create Oliver from existing data
+            const oliver = { id: 'oliver', name: 'Oliver', avatar: '\u{1F60E}', createdAt: Date.now() };
+            const asher = { id: 'asher', name: 'Asher', avatar: '\u{1F9B8}', createdAt: Date.now() };
+            saveProfiles([oliver, asher]);
+            localStorage.setItem('bbg_profile_oliver', oldData);
+            // Initialize Asher with empty data
+            localStorage.setItem('bbg_profile_asher', JSON.stringify({
+                version: 1, playerName: 'Asher', globalXP: 0, globalLevel: 1,
+                coins: 0, totalCoinsEarned: 0, mathMastery: {}, readingMastery: {},
+                dailyStreak: 0, lastPlayDate: null, totalPlayTime: 0,
+                gamesPlayed: {}, globalAchievements: [],
+                createdAt: Date.now(), updatedAt: Date.now()
+            }));
+            setActiveProfile('oliver');
+        } else {
+            // No old data, create both fresh
+            const oliver = { id: 'oliver', name: 'Oliver', avatar: '\u{1F60E}', createdAt: Date.now() };
+            const asher = { id: 'asher', name: 'Asher', avatar: '\u{1F9B8}', createdAt: Date.now() };
+            saveProfiles([oliver, asher]);
+            _initEmptyProfile('oliver', 'Oliver');
+            _initEmptyProfile('asher', 'Asher');
+        }
+    }
+
+    function _initEmptyProfile(id, name) {
+        localStorage.setItem('bbg_profile_' + id, JSON.stringify({
+            version: 1, playerName: name, globalXP: 0, globalLevel: 1,
+            coins: 0, totalCoinsEarned: 0, mathMastery: {}, readingMastery: {},
+            dailyStreak: 0, lastPlayDate: null, totalPlayTime: 0,
+            gamesPlayed: {}, globalAchievements: [],
+            createdAt: Date.now(), updatedAt: Date.now()
+        }));
+    }
+
+    return { getProfiles, getActiveProfileId, setActiveProfile, createProfile, getProfileKey, getActiveProfile, migrateIfNeeded };
+})();
+
+/**
  * BBG Ecosystem — Shared cross-game profile and mastery tracking
  * (Blake Boys Gaming)
  *
@@ -10,7 +110,6 @@
  * OTBEcosystem methods alongside your game-specific progress tracking.
  */
 const OTBEcosystem = (() => {
-    const PROFILE_KEY = 'bbg_shared_profile';
     const VERSION = 1;
 
     // XP curve: each level requires more XP
@@ -43,7 +142,8 @@ const OTBEcosystem = (() => {
             localStorage.setItem('bbg_shared_profile', localStorage.getItem('otb_shared_profile'));
         }
         try {
-            const raw = localStorage.getItem(PROFILE_KEY);
+            const key = typeof ProfileManager !== 'undefined' ? ProfileManager.getProfileKey() : 'bbg_shared_profile';
+            const raw = localStorage.getItem(key);
             if (!raw) return _getDefault();
             const data = JSON.parse(raw);
             // Merge with defaults for forward compat
@@ -57,7 +157,8 @@ const OTBEcosystem = (() => {
     function _save(profile) {
         try {
             profile.updatedAt = Date.now();
-            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+            const key = typeof ProfileManager !== 'undefined' ? ProfileManager.getProfileKey() : 'bbg_shared_profile';
+            localStorage.setItem(key, JSON.stringify(profile));
         } catch (e) {
             console.warn('[BBG Ecosystem] Failed to save profile:', e);
         }

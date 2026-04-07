@@ -1,5 +1,5 @@
 /* ============================================
-   OTB Games Hub — Main Controller v2.1
+   OTB Games Hub — Main Controller v2.3
    Integrates: Shop, Trophies, Challenges,
    Progress Map, Animations, Report Card, Pet,
    Daily Login Bonus, Background Music
@@ -191,8 +191,104 @@
         setTimeout(() => { if (overlay.parentNode) dismiss(); }, 5000);
     }
 
+    // ========== PROFILE SELECTION ==========
+    function showProfileSelect() {
+        document.getElementById('hub').style.display = 'none';
+        const screen = document.getElementById('profile-select');
+        screen.style.display = 'flex';
+        renderProfileCards();
+    }
+
+    function renderProfileCards() {
+        const container = document.getElementById('profile-cards');
+        const profiles = ProfileManager.getProfiles();
+        container.innerHTML = '';
+
+        profiles.forEach(p => {
+            // Load this profile's data for stats
+            let level = 1, streak = 0;
+            try {
+                const data = JSON.parse(localStorage.getItem('bbg_profile_' + p.id) || '{}');
+                level = data.globalLevel || 1;
+                streak = data.dailyStreak || 0;
+            } catch {}
+
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            card.innerHTML = `
+                <span class="profile-card-avatar">${p.avatar}</span>
+                <div class="profile-card-name">${p.name}</div>
+                <div class="profile-card-stats">Lv. ${level} \u{2022} \u{1F525} ${streak} day${streak !== 1 ? 's' : ''}</div>
+            `;
+            card.addEventListener('click', () => selectProfile(p.id));
+            container.appendChild(card);
+        });
+    }
+
+    function selectProfile(id) {
+        ProfileManager.setActiveProfile(id);
+        document.getElementById('profile-select').style.display = 'none';
+        document.getElementById('hub').style.display = 'block';
+        loadProfile();
+        loadHomeTab();
+        applyTheme();
+        checkGameAvailability();
+        HubReportCard.takeSnapshot();
+        checkForCelebrations();
+        setTimeout(() => checkDailyLoginBonus(), 600);
+    }
+
+    function initAddPlayerModal() {
+        const addBtn = document.getElementById('add-profile-btn');
+        const modal = document.getElementById('add-player-modal');
+        const createBtn = document.getElementById('create-player-btn');
+        const cancelBtn = document.getElementById('cancel-player-btn');
+        const nameInput = document.getElementById('new-player-name');
+        const picker = document.getElementById('avatar-picker');
+        let selectedAvatar = '\u{1F60E}';
+
+        addBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            nameInput.value = '';
+            nameInput.focus();
+        });
+
+        picker.addEventListener('click', (e) => {
+            const opt = e.target.closest('.avatar-option');
+            if (!opt) return;
+            picker.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectedAvatar = opt.dataset.avatar;
+        });
+
+        createBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (!name) { nameInput.focus(); return; }
+            const result = ProfileManager.createProfile(name, selectedAvatar);
+            if (!result) {
+                nameInput.value = '';
+                nameInput.placeholder = 'Name already taken!';
+                nameInput.focus();
+                return;
+            }
+            modal.style.display = 'none';
+            renderProfileCards();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    }
+
     // ========== MAIN INIT ==========
     function init() {
+        // Run profile migration on first load
+        ProfileManager.migrateIfNeeded();
+
         // Set game card URLs from config
         document.querySelectorAll('[data-game]').forEach(card => {
             const gameId = card.dataset.game;
@@ -216,6 +312,18 @@
             HubMusic.updateToggleBtn();
         }
 
+        // Profile switch button in header
+        const switchBtn = document.getElementById('switch-profile-btn');
+        if (switchBtn) {
+            switchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showProfileSelect();
+            });
+        }
+
+        // Init add player modal
+        initAddPlayerModal();
+
         // Start music on first user interaction
         const startMusicOnce = () => {
             HubMusic.start();
@@ -231,15 +339,32 @@
             splash.style.opacity = '0';
             setTimeout(() => {
                 splash.style.display = 'none';
-                document.getElementById('hub').style.display = 'block';
-                loadProfile();
-                loadHomeTab();
-                applyTheme();
-                checkGameAvailability();
-                HubReportCard.takeSnapshot();
-                checkForCelebrations();
-                // Daily login bonus after everything loads
-                setTimeout(() => checkDailyLoginBonus(), 600);
+
+                const profiles = ProfileManager.getProfiles();
+                const activeId = ProfileManager.getActiveProfileId();
+
+                // If only 1 profile, auto-select and go to hub
+                if (profiles.length === 1) {
+                    ProfileManager.setActiveProfile(profiles[0].id);
+                    document.getElementById('hub').style.display = 'block';
+                    loadProfile();
+                    loadHomeTab();
+                    applyTheme();
+                    checkGameAvailability();
+                    HubReportCard.takeSnapshot();
+                    checkForCelebrations();
+                    setTimeout(() => checkDailyLoginBonus(), 600);
+                } else if (profiles.length > 1) {
+                    // Multiple profiles: always show picker
+                    showProfileSelect();
+                } else {
+                    // No profiles at all (shouldn't happen after migration, but fallback)
+                    document.getElementById('hub').style.display = 'block';
+                    loadProfile();
+                    loadHomeTab();
+                    applyTheme();
+                    checkGameAvailability();
+                }
             }, 500);
         }, 1800);
 
@@ -271,10 +396,41 @@
         else if (tabId === 'report') loadReport();
     }
 
+    function getGreeting(name) {
+        const hour = new Date().getHours();
+        if (hour < 12) return `Good morning, ${name}! ☀️`;
+        if (hour < 17) return `Good afternoon, ${name}! 🌤️`;
+        return `Good evening, ${name}! 🌙`;
+    }
+
     function loadHomeTab() {
-        // Daily challenges
+        // Add greeting above daily challenges
         const challengeEl = document.getElementById('daily-challenges');
-        if (challengeEl) challengeEl.innerHTML = HubChallenges.renderChallenges();
+        if (challengeEl) {
+            const profile = typeof OTBEcosystem !== 'undefined' ? OTBEcosystem.getProfile() : {};
+            const name = profile.playerName || 'Player';
+            const greeting = getGreeting(name);
+            challengeEl.innerHTML = `<div class="hub-greeting">${greeting}</div>` + HubChallenges.renderChallenges();
+        }
+
+        // Add NEW badges to potion-lab and spidey-academy cards
+        addNewBadges();
+    }
+
+    function addNewBadges() {
+        const newGames = ['card-potionlab', 'card-spideyacademy'];
+        newGames.forEach(cardId => {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            const banner = card.querySelector('.hub-game-banner');
+            if (!banner) return;
+            if (banner.querySelector('.game-new-badge')) return;
+            banner.style.position = 'relative';
+            const badge = document.createElement('span');
+            badge.className = 'game-new-badge';
+            badge.textContent = 'NEW';
+            banner.appendChild(badge);
+        });
     }
 
     function loadTrophies() {
@@ -329,13 +485,24 @@
         const summary = OTBEcosystem.getSummary();
         const streak = OTBEcosystem.checkDailyStreak();
 
-        // Player info
+        // Player info from active profile
         const nameEl = document.getElementById('player-name');
-        if (profile.playerName) nameEl.textContent = profile.playerName;
+        const activeProfile = typeof ProfileManager !== 'undefined' ? ProfileManager.getActiveProfile() : null;
+        if (activeProfile) {
+            nameEl.textContent = activeProfile.name;
+        } else if (profile.playerName) {
+            nameEl.textContent = profile.playerName;
+        }
 
-        // Avatar
+        // Avatar: use profile avatar, fallback to shop avatar
         const avatarEl = document.getElementById('player-avatar');
-        if (avatarEl) avatarEl.textContent = HubShop.getAvatarEmoji();
+        if (avatarEl) {
+            if (activeProfile && activeProfile.avatar) {
+                avatarEl.textContent = activeProfile.avatar;
+            } else {
+                avatarEl.textContent = HubShop.getAvatarEmoji();
+            }
+        }
 
         // Name color
         const eq = HubShop.getEquipped();

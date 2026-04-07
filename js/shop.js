@@ -30,6 +30,14 @@ const HubShop = (() => {
         { id: 'title-champion', name: 'Champion', type: 'title', price: 100, title: 'Champion', desc: 'The best of the best' },
         { id: 'title-legend', name: 'Legend', type: 'title', price: 200, title: 'Legend', desc: 'Absolutely legendary' },
 
+        // Pet Accessories
+        { id: 'pet-crown', name: 'Crown', type: 'petAccessory', price: 50, emoji: '👑', desc: 'Royal pet!' },
+        { id: 'pet-sunglasses', name: 'Sunglasses', type: 'petAccessory', price: 40, emoji: '🕶️', desc: 'Cool shades' },
+        { id: 'pet-bow', name: 'Bow', type: 'petAccessory', price: 30, emoji: '🎀', desc: 'Pretty bow' },
+        { id: 'pet-tophat', name: 'Top Hat', type: 'petAccessory', price: 60, emoji: '🎩', desc: 'Fancy hat' },
+        { id: 'pet-partyhat', name: 'Party Hat', type: 'petAccessory', price: 35, emoji: '🥳', desc: 'Party time!' },
+        { id: 'pet-cape', name: 'Cape', type: 'petAccessory', price: 75, emoji: '🦸', desc: 'Super pet!' },
+
         // Hub Themes
         { id: 'theme-space', name: 'Space', type: 'hubTheme', price: 100, theme: 'space', desc: 'Stars and galaxies', preview: '🌌' },
         { id: 'theme-ocean', name: 'Ocean', type: 'hubTheme', price: 100, theme: 'ocean', desc: 'Deep sea vibes', preview: '🌊' },
@@ -42,10 +50,11 @@ const HubShop = (() => {
         avatar: '🎭 Avatars',
         nameColor: '🎨 Name Colors',
         title: '🏷️ Titles',
+        petAccessory: '🐾 Pet Accessories',
         hubTheme: '🎨 Hub Themes'
     };
 
-    const TYPE_ORDER = ['avatar', 'nameColor', 'title', 'hubTheme'];
+    const TYPE_ORDER = ['avatar', 'nameColor', 'title', 'petAccessory', 'hubTheme'];
 
     function getProfile() {
         return OTBEcosystem.getProfile();
@@ -63,6 +72,10 @@ const HubShop = (() => {
         if (item.type === 'nameColor') return eq.nameColor === (item.color || item.id);
         if (item.type === 'title') return eq.title === (item.title || '');
         if (item.type === 'hubTheme') return eq.hubTheme === (item.theme || 'default');
+        if (item.type === 'petAccessory') {
+            if (typeof HubPet !== 'undefined') return HubPet.getEquippedAccessory() === item.id;
+            return false;
+        }
         return false;
     }
 
@@ -95,6 +108,10 @@ const HubShop = (() => {
         else if (item.type === 'nameColor') p.equippedItems.nameColor = item.color || item.id;
         else if (item.type === 'title') p.equippedItems.title = item.title || '';
         else if (item.type === 'hubTheme') p.equippedItems.hubTheme = item.theme || 'default';
+        else if (item.type === 'petAccessory') {
+            if (typeof HubPet !== 'undefined') HubPet.equipAccessory(item.id);
+            return true;
+        }
 
         p.updatedAt = Date.now();
         localStorage.setItem('otb_shared_profile', JSON.stringify(p));
@@ -108,6 +125,10 @@ const HubShop = (() => {
         else if (type === 'nameColor') p.equippedItems.nameColor = 'gold';
         else if (type === 'title') p.equippedItems.title = '';
         else if (type === 'hubTheme') p.equippedItems.hubTheme = 'default';
+        else if (type === 'petAccessory') {
+            if (typeof HubPet !== 'undefined') HubPet.equipAccessory(null);
+            return;
+        }
         p.updatedAt = Date.now();
         localStorage.setItem('otb_shared_profile', JSON.stringify(p));
     }
@@ -146,6 +167,7 @@ const HubShop = (() => {
 
                 let visual = '';
                 if (item.type === 'avatar') visual = `<span class="shop-item-visual">${item.emoji}</span>`;
+                else if (item.type === 'petAccessory') visual = `<span class="shop-item-visual">${item.emoji}</span>`;
                 else if (item.type === 'nameColor') {
                     if (item.color === 'rainbow') visual = `<span class="shop-item-visual shop-rainbow-text">Aa</span>`;
                     else visual = `<span class="shop-item-visual" style="color:${item.color}">Aa</span>`;

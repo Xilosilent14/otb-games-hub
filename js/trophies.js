@@ -172,11 +172,25 @@ const HubTrophies = (() => {
 
     function renderTrophyRoom() {
         const earned = getEarnedAchievements();
-        let html = `<div class="trophy-header">
-            <h2 class="trophy-title">Trophy Room</h2>
-        </div>`;
-
         const gameOrder = ['hub', 'thinkfast', 'wordmine', 'rhythmblast', 'spidey-academy'];
+
+        // Calculate totals first
+        let totalEarned = 0, totalAll = 0;
+        for (const gameId of gameOrder) {
+            const game = REGISTRY[gameId];
+            if (!game) continue;
+            totalAll += game.trophies.length;
+            totalEarned += game.trophies.filter(t => (earned[gameId] || new Set()).has(t.id)).length;
+        }
+
+        const totalPct = totalAll > 0 ? Math.floor((totalEarned / totalAll) * 100) : 0;
+
+        let html = `<div class="trophy-header">
+            <div class="trophy-count">${totalEarned} / ${totalAll} Trophies Earned</div>
+            <div class="trophy-progress">
+                <div class="trophy-progress-fill" style="width:${totalPct}%"></div>
+            </div>
+        </div>`;
 
         for (const gameId of gameOrder) {
             const game = REGISTRY[gameId];
@@ -187,37 +201,24 @@ const HubTrophies = (() => {
             const count = game.trophies.filter(t => gameEarned.has(t.id)).length;
 
             html += `<div class="trophy-game-section">
-                <div class="trophy-game-header" style="border-color: ${game.color}">
-                    <span class="trophy-game-icon">${game.icon}</span>
-                    <span class="trophy-game-name">${game.name}</span>
-                    <span class="trophy-game-count">${count}/${total}</span>
-                    <div class="trophy-game-bar">
-                        <div class="trophy-game-bar-fill" style="width:${total > 0 ? (count/total*100) : 0}%;background:${game.color}"></div>
-                    </div>
+                <div class="trophy-game-title" style="background:${game.color}22;border-left:3px solid ${game.color};">
+                    <span>${game.icon}</span>
+                    <span>${game.name}</span>
+                    <span style="margin-left:auto;font-size:0.8rem;color:var(--otb-coin);">${count}/${total}</span>
                 </div>
                 <div class="trophy-grid">`;
 
             for (const trophy of game.trophies) {
                 const isEarned = gameEarned.has(trophy.id);
                 html += `<div class="trophy-item ${isEarned ? 'earned' : 'locked'}" title="${trophy.desc}">
-                    <div class="trophy-icon">${isEarned ? trophy.icon : '❓'}</div>
+                    <div class="trophy-icon">${isEarned ? trophy.icon : '🔒'}</div>
                     <div class="trophy-name">${isEarned ? trophy.name : '???'}</div>
-                    ${isEarned ? `<div class="trophy-desc">${trophy.desc}</div>` : ''}
+                    <div class="trophy-desc">${trophy.desc}</div>
                 </div>`;
             }
 
             html += `</div></div>`;
         }
-
-        // Total count
-        let totalEarned = 0, totalAll = 0;
-        for (const gameId of gameOrder) {
-            const game = REGISTRY[gameId];
-            totalAll += game.trophies.length;
-            totalEarned += game.trophies.filter(t => (earned[gameId] || new Set()).has(t.id)).length;
-        }
-
-        html = html.replace('Trophy Room</h2>', `Trophy Room <span class="trophy-total">${totalEarned}/${totalAll}</span></h2>`);
 
         return html;
     }

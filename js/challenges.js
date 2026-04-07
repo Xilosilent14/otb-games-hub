@@ -5,13 +5,13 @@ const HubChallenges = (() => {
     const CHALLENGE_POOL = [
         // Play-based
         { id: 'play-any', text: 'Play any game', icon: '🎮', reward: 15, check: (s) => Object.values(s.gamesPlayed || {}).reduce((a,b) => a+b, 0) > (s._prevGamesPlayed || 0) },
-        { id: 'play-thinkfast', text: 'Play Think Fast', icon: '🏎️', reward: 15, check: (s) => (s.gamesPlayed?.['corvette-racer'] || 0) > (s._prevTF || 0) },
+        { id: 'play-thinkfast', text: 'Play Think Fast', icon: '🏎️', reward: 15, check: (s) => (s.gamesPlayed?.['think-fast'] || 0) > (s._prevTF || 0) },
         { id: 'play-wordmine', text: 'Play Word Mine', icon: '⛏️', reward: 15, check: (s) => (s.gamesPlayed?.['word-mine'] || 0) > (s._prevWM || 0) },
         { id: 'play-rhythm', text: 'Play Rhythm Blast', icon: '🎵', reward: 15, check: (s) => (s.gamesPlayed?.['rhythm-blast'] || 0) > (s._prevRB || 0) },
         { id: 'play-two', text: 'Play 2 different games', icon: '🎲', reward: 25, check: (s) => {
             const played = s.gamesPlayed || {};
             let count = 0;
-            if ((played['corvette-racer'] || 0) > (s._prevTF || 0)) count++;
+            if ((played['think-fast'] || 0) > (s._prevTF || 0)) count++;
             if ((played['word-mine'] || 0) > (s._prevWM || 0)) count++;
             if ((played['rhythm-blast'] || 0) > (s._prevRB || 0)) count++;
             return count >= 2;
@@ -80,7 +80,7 @@ const HubChallenges = (() => {
         const summary = OTBEcosystem.getSummary();
         const snapshot = {
             _prevGamesPlayed: Object.values(profile.gamesPlayed || {}).reduce((a,b) => a+b, 0),
-            _prevTF: (profile.gamesPlayed || {})['corvette-racer'] || 0,
+            _prevTF: (profile.gamesPlayed || {})['think-fast'] || 0,
             _prevWM: (profile.gamesPlayed || {})['word-mine'] || 0,
             _prevRB: (profile.gamesPlayed || {})['rhythm-blast'] || 0,
             _prevAnswers: summary.totalAnswers,
@@ -139,22 +139,79 @@ const HubChallenges = (() => {
         localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
     }
 
+    function _getProgressForChallenge(challenge, snapshot) {
+        const profile = OTBEcosystem.getProfile();
+        const summary = OTBEcosystem.getSummary();
+        const id = challenge.id;
+
+        if (id === 'answer-5') return { current: Math.min(summary.totalAnswers - (snapshot._prevAnswers || 0), 5), target: 5 };
+        if (id === 'answer-10') return { current: Math.min(summary.totalAnswers - (snapshot._prevAnswers || 0), 10), target: 10 };
+        if (id === 'answer-20') return { current: Math.min(summary.totalAnswers - (snapshot._prevAnswers || 0), 20), target: 20 };
+        if (id === 'math-5') {
+            const math = profile.mathMastery || {};
+            const total = Object.values(math).reduce((a,t) => a + t.total, 0);
+            return { current: Math.min(total - (snapshot._prevMathTotal || 0), 5), target: 5 };
+        }
+        if (id === 'reading-5') {
+            const reading = profile.readingMastery || {};
+            const total = Object.values(reading).reduce((a,t) => a + t.total, 0);
+            return { current: Math.min(total - (snapshot._prevReadTotal || 0), 5), target: 5 };
+        }
+        if (id === 'earn-xp-50') return { current: Math.min(profile.globalXP - (snapshot._prevXP || 0), 50), target: 50 };
+        if (id === 'earn-xp-100') return { current: Math.min(profile.globalXP - (snapshot._prevXP || 0), 100), target: 100 };
+        if (id === 'play-5min') return { current: Math.min(Math.floor((profile.totalPlayTime - (snapshot._prevPlayTime || 0)) / 60), 5), target: 5 };
+        if (id === 'play-15min') return { current: Math.min(Math.floor((profile.totalPlayTime - (snapshot._prevPlayTime || 0)) / 60), 15), target: 15 };
+        if (id === 'play-two') {
+            const played = profile.gamesPlayed || {};
+            let count = 0;
+            if ((played['think-fast'] || 0) > (snapshot._prevTF || 0)) count++;
+            if ((played['word-mine'] || 0) > (snapshot._prevWM || 0)) count++;
+            if ((played['rhythm-blast'] || 0) > (snapshot._prevRB || 0)) count++;
+            return { current: Math.min(count, 2), target: 2 };
+        }
+        // Single-step challenges (play-any, play-thinkfast, etc.)
+        return null;
+    }
+
+    function _getResetHours() {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        const diff = tomorrow - now;
+        return Math.floor(diff / (1000 * 60 * 60));
+    }
+
     function renderChallenges() {
+        const data = getDailyChallenges();
         const challenges = checkProgress();
         const allDone = challenges.every(c => c.completed);
+        const hoursLeft = _getResetHours();
 
-        let html = `<div class="challenges-header">
+        let html = `<div class="challenge-timer">Resets in ${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}</div>`;
+        html += `<div class="challenges-header">
             <h3 class="challenges-title">Daily Challenges</h3>
             ${allDone ? '<span class="challenges-complete">All Done! 🎉</span>' : ''}
         </div>
         <div class="challenges-list">`;
 
         for (const c of challenges) {
-            html += `<div class="challenge-item ${c.completed ? 'completed' : ''}">
-                <span class="challenge-check">${c.completed ? '✅' : '⬜'}</span>
-                <span class="challenge-icon">${c.icon}</span>
-                <span class="challenge-text">${c.text}</span>
-                <span class="challenge-reward">🪙 ${c.reward}</span>
+            const progress = _getProgressForChallenge(c, data.snapshot || {});
+            const pct = c.completed ? 100 : (progress ? Math.max(0, Math.floor((progress.current / progress.target) * 100)) : 0);
+
+            html += `<div class="challenge-card ${c.completed ? 'completed' : ''}">
+                <div class="challenge-icon">${c.icon}</div>
+                <div class="challenge-info">
+                    <div class="challenge-title">${c.text}</div>
+                    <div class="challenge-progress">
+                        <div class="challenge-progress-fill" style="width:${pct}%"></div>
+                    </div>
+                    ${progress && !c.completed ? `<div style="font-size:0.65rem;color:var(--otb-text-muted);margin-top:2px;">${Math.max(0, progress.current)}/${progress.target}</div>` : ''}
+                </div>
+                ${c.completed
+                    ? '<div class="challenge-check">✅</div>'
+                    : `<div class="challenge-reward">🪙 ${c.reward}</div>`
+                }
             </div>`;
         }
 
