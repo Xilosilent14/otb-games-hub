@@ -684,14 +684,13 @@
         newGames.forEach(cardId => {
             const card = document.getElementById(cardId);
             if (!card) return;
-            const banner = card.querySelector('.hub-game-banner');
-            if (!banner) return;
-            if (banner.querySelector('.game-new-badge')) return;
-            banner.style.position = 'relative';
+            const title = card.querySelector('.hub-game-title');
+            if (!title) return;
+            if (title.querySelector('.game-new-badge')) return;
             const badge = document.createElement('span');
             badge.className = 'game-new-badge';
             badge.textContent = 'NEW';
-            banner.appendChild(badge);
+            title.appendChild(badge);
         });
     }
 
