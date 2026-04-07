@@ -118,6 +118,8 @@ const HubChallenges = (() => {
                 changed = true;
                 // Award coins
                 OTBEcosystem.addCoins(challenge.reward, 'daily-challenge');
+                // Play challenge complete SFX
+                if (typeof HubSFX !== 'undefined') HubSFX.challengeComplete();
                 // Update history
                 _addToHistory();
             }

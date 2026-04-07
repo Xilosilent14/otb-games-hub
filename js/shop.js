@@ -209,6 +209,7 @@ const HubShop = (() => {
                 if (result.success) {
                     // Auto-equip on purchase
                     equip(itemId);
+                    if (typeof HubSFX !== 'undefined') HubSFX.shopPurchase();
                     HubAnimations.coinSpend(item.price);
                     HubAnimations.showToast(`Bought ${item.name}!`, item.emoji || '🛍️');
                     // Re-render shop and refresh hub
@@ -221,6 +222,7 @@ const HubShop = (() => {
         container.querySelectorAll('.shop-btn-equip').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (typeof HubSFX !== 'undefined') HubSFX.click();
                 const itemId = btn.dataset.item;
                 equip(itemId);
                 if (typeof refreshShop === 'function') refreshShop();

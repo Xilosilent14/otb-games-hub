@@ -279,6 +279,7 @@ const HubPet = (() => {
             feedBtn.addEventListener('click', () => {
                 const result = feedPet();
                 if (result.success) {
+                    if (typeof HubSFX !== 'undefined') HubSFX.petBoop();
                     HubAnimations.showToast('Yum! Your pet feels better!', '🍎');
                     // Do a random trick
                     if (result.trick) _doTrick(container, result.trick);
@@ -294,6 +295,7 @@ const HubPet = (() => {
 
         if (playBtn) {
             playBtn.addEventListener('click', () => {
+                if (typeof HubSFX !== 'undefined') HubSFX.petBoop();
                 playWithPet();
                 HubAnimations.showToast('Your pet had fun!', '🎾');
                 HubAnimations.confetti(1500);
@@ -303,12 +305,14 @@ const HubPet = (() => {
 
         if (customizeBtn && panel) {
             customizeBtn.addEventListener('click', () => {
+                if (typeof HubSFX !== 'undefined') HubSFX.click();
                 panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
             });
         }
 
         container.querySelectorAll('.pet-body-option').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (typeof HubSFX !== 'undefined') HubSFX.click();
                 setPetBody(btn.dataset.body);
                 if (typeof refreshPet === 'function') refreshPet();
             });
@@ -320,6 +324,7 @@ const HubPet = (() => {
             nameSave.addEventListener('click', () => {
                 const name = nameInput.value.trim();
                 if (name) {
+                    if (typeof HubSFX !== 'undefined') HubSFX.click();
                     setPetName(name);
                     HubAnimations.showToast(`Renamed to ${name}!`, '✏️');
                     if (typeof refreshPet === 'function') refreshPet();

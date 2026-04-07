@@ -33,8 +33,9 @@ const HubAnimations = (() => {
         setTimeout(() => container.remove(), duration + 1000);
     }
 
-    // Coin rain effect
+    // Coin rain effect (with coin collect SFX)
     function coinRain(amount = 10) {
+        if (typeof HubSFX !== 'undefined') HubSFX.coinCollect();
         const container = document.createElement('div');
         container.className = 'anim-coin-container';
         document.body.appendChild(container);

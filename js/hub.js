@@ -1,5 +1,5 @@
 /* ============================================
-   OTB Games Hub — Main Controller v2.3
+   OTB Games Hub — Main Controller v2.5
    Integrates: Shop, Trophies, Challenges,
    Progress Map, Animations, Report Card, Pet,
    Daily Login Bonus, Background Music
@@ -109,8 +109,133 @@
             if (btn) btn.textContent = enabled ? '\u{1F3B5}' : '\u{1F507}';
         }
 
-        return { start, stop, toggle, updateToggleBtn, isEnabled: () => enabled };
+        return { start, stop, toggle, updateToggleBtn, isEnabled: () => enabled, get _ctx() { return ctx; } };
     })();
+
+    // ========== UI SOUND EFFECTS ==========
+    const HubSFX = (() => {
+        let sfxEnabled = localStorage.getItem('bbg_hub_sfx') !== 'off';
+
+        function getCtx() {
+            // Reuse HubMusic's AudioContext if available, otherwise create one
+            if (HubMusic._ctx) return HubMusic._ctx;
+            if (!HubSFX._ctx) {
+                try {
+                    HubSFX._ctx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) { return null; }
+            }
+            return HubSFX._ctx;
+        }
+
+        function _tone(freq, duration, vol, type, startDelay) {
+            if (!sfxEnabled) return;
+            const ctx = getCtx();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime + (startDelay || 0);
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + duration + 0.02);
+        }
+
+        // 1. Button / tab click - soft sine pop ~800Hz, 0.06s
+        function click() {
+            _tone(800, 0.06, 0.18, 'sine');
+        }
+
+        // 2. Achievement unlock - triumphant ascending 3-note chime (C5, E5, G5)
+        function achievementUnlock() {
+            _tone(523.25, 0.25, 0.22, 'sine', 0);      // C5
+            _tone(659.25, 0.25, 0.22, 'sine', 0.12);    // E5
+            _tone(783.99, 0.4,  0.25, 'sine', 0.24);    // G5 (held longer)
+        }
+
+        // 3. Coin collection - bright metallic ding ~1200Hz, short decay
+        function coinCollect() {
+            _tone(1200, 0.15, 0.2, 'triangle');
+            _tone(2400, 0.1,  0.08, 'sine', 0.02);  // harmonic shimmer
+        }
+
+        // 4. Level up - 4-note ascending fanfare with harmony
+        function levelUp() {
+            _tone(523.25, 0.2, 0.2,  'sine', 0);       // C5
+            _tone(659.25, 0.2, 0.2,  'sine', 0.15);     // E5
+            _tone(783.99, 0.2, 0.2,  'sine', 0.30);     // G5
+            _tone(1046.5, 0.5, 0.25, 'sine', 0.45);     // C6
+            // Harmony layer
+            _tone(392.0,  0.3, 0.1,  'triangle', 0);    // G4
+            _tone(523.25, 0.3, 0.1,  'triangle', 0.15); // C5
+            _tone(659.25, 0.3, 0.1,  'triangle', 0.30); // E5
+            _tone(783.99, 0.4, 0.12, 'triangle', 0.45); // G5
+        }
+
+        // 5. Challenge complete - success 2-note chime
+        function challengeComplete() {
+            _tone(659.25, 0.2, 0.2, 'sine', 0);     // E5
+            _tone(880.0,  0.35, 0.22, 'sine', 0.12); // A5
+        }
+
+        // 6. Shop purchase - cash register descending ding
+        function shopPurchase() {
+            _tone(1400, 0.1,  0.2,  'triangle', 0);
+            _tone(1100, 0.1,  0.18, 'triangle', 0.08);
+            _tone(880,  0.15, 0.15, 'triangle', 0.16);
+            _tone(660,  0.25, 0.22, 'sine',     0.22);
+        }
+
+        // 7. Pet interaction - cute boop, soft sine pop ~600Hz
+        function petBoop() {
+            _tone(600, 0.08, 0.18, 'sine');
+            _tone(900, 0.06, 0.08, 'sine', 0.04);
+        }
+
+        // 8. Daily login bonus - special celebratory fanfare (longer)
+        function dailyLoginFanfare() {
+            // Rising arpeggio
+            _tone(392.0,  0.18, 0.18, 'sine', 0);       // G4
+            _tone(523.25, 0.18, 0.18, 'sine', 0.1);     // C5
+            _tone(659.25, 0.18, 0.2,  'sine', 0.2);     // E5
+            _tone(783.99, 0.18, 0.2,  'sine', 0.3);     // G5
+            _tone(1046.5, 0.5,  0.25, 'sine', 0.4);     // C6 held
+            // Sparkle harmony
+            _tone(523.25, 0.3,  0.08, 'triangle', 0.1);
+            _tone(783.99, 0.3,  0.08, 'triangle', 0.3);
+            _tone(1318.5, 0.4,  0.06, 'triangle', 0.5); // E6 shimmer
+        }
+
+        function toggle() {
+            sfxEnabled = !sfxEnabled;
+            localStorage.setItem('bbg_hub_sfx', sfxEnabled ? 'on' : 'off');
+            if (sfxEnabled) click(); // Play a sample click as feedback
+            return sfxEnabled;
+        }
+
+        function isEnabled() { return sfxEnabled; }
+
+        return {
+            click,
+            achievementUnlock,
+            coinCollect,
+            challengeComplete,
+            levelUp,
+            shopPurchase,
+            petBoop,
+            dailyLoginFanfare,
+            toggle,
+            isEnabled
+        };
+    })();
+
+    // Expose HubSFX globally so other modules can use it
+    window.HubSFX = HubSFX;
 
     // ========== DAILY LOGIN BONUS ==========
     function checkDailyLoginBonus() {
@@ -168,8 +293,9 @@
             </div>`;
         document.body.appendChild(overlay);
 
-        // Fire confetti and coin rain
+        // Fire confetti, coin rain, and fanfare SFX
         setTimeout(() => {
+            HubSFX.dailyLoginFanfare();
             HubAnimations.confetti(3000);
             HubAnimations.coinRain(coins);
         }, 300);
@@ -177,11 +303,15 @@
         // Collect button
         const collectBtn = overlay.querySelector('.login-bonus-collect');
         function dismiss() {
+            HubSFX.coinCollect();
             overlay.classList.add('login-bonus-fadeout');
             setTimeout(() => overlay.remove(), 400);
             loadProfile(); // Refresh coin/xp display
             if (leveledUp) {
-                setTimeout(() => HubAnimations.levelUp(OTBEcosystem.getLevelInfo().level), 500);
+                setTimeout(() => {
+                    HubSFX.levelUp();
+                    HubAnimations.levelUp(OTBEcosystem.getLevelInfo().level);
+                }, 500);
             }
         }
         collectBtn.addEventListener('click', dismiss);
@@ -220,7 +350,7 @@
                 <div class="profile-card-name">${p.name}</div>
                 <div class="profile-card-stats">Lv. ${level} \u{2022} \u{1F525} ${streak} day${streak !== 1 ? 's' : ''}</div>
             `;
-            card.addEventListener('click', () => selectProfile(p.id));
+            card.addEventListener('click', () => { HubSFX.click(); selectProfile(p.id); });
             container.appendChild(card);
         });
     }
@@ -236,6 +366,7 @@
         HubReportCard.takeSnapshot();
         checkForCelebrations();
         setTimeout(() => checkDailyLoginBonus(), 600);
+        setTimeout(() => HubTutorial.start(), 1200);
     }
 
     function initAddPlayerModal() {
@@ -264,6 +395,7 @@
         createBtn.addEventListener('click', () => {
             const name = nameInput.value.trim();
             if (!name) { nameInput.focus(); return; }
+            HubSFX.click();
             const result = ProfileManager.createProfile(name, selectedAvatar);
             if (!result) {
                 nameInput.value = '';
@@ -284,17 +416,141 @@
         });
     }
 
+    // ========== FIRST-TIME TUTORIAL ==========
+    const HubTutorial = (() => {
+        const STEPS = [
+            { emoji: '\u{1F3AE}', text: 'Welcome to Blake Boys Gaming! This is your game hub.', target: '#hub', position: 'center' },
+            { emoji: '\u{1F3B2}', text: 'Pick a game to play! Each one helps you learn.', target: '.hub-games-grid', position: 'below' },
+            { emoji: '\u2B50', text: 'Complete daily challenges to earn coins!', target: '#daily-challenges', position: 'below' },
+            { emoji: '\u{1F6CD}\uFE0F', text: 'Visit the shop to customize your look!', target: '[data-tab="shop"]', position: 'below' },
+            { emoji: '\u{1F431}', text: 'Take care of your pet friend!', target: '[data-tab="pet"]', position: 'below' }
+        ];
+
+        let currentStep = 0;
+        let overlay, backdrop, spotlight, card, textEl, emojiEl, dotsEl, nextBtn, skipBtn;
+
+        function shouldShow() {
+            return !localStorage.getItem('bbg_hub_tutorial_done');
+        }
+
+        function start() {
+            if (!shouldShow()) return;
+            overlay = document.getElementById('hub-tutorial');
+            backdrop = document.getElementById('tutorial-backdrop');
+            spotlight = document.getElementById('tutorial-spotlight');
+            card = document.getElementById('tutorial-card');
+            textEl = document.getElementById('tutorial-text');
+            emojiEl = document.getElementById('tutorial-emoji');
+            dotsEl = document.getElementById('tutorial-dots');
+            nextBtn = document.getElementById('tutorial-next');
+            skipBtn = document.getElementById('tutorial-skip');
+
+            if (!overlay) return;
+
+            currentStep = 0;
+            overlay.style.display = 'block';
+
+            // Build dots
+            dotsEl.innerHTML = STEPS.map((_, i) => `<span class="tutorial-dot" data-i="${i}"></span>`).join('');
+
+            nextBtn.addEventListener('click', next);
+            skipBtn.addEventListener('click', finish);
+
+            showStep(0);
+        }
+
+        function showStep(idx) {
+            currentStep = idx;
+            const step = STEPS[idx];
+
+            emojiEl.textContent = step.emoji;
+            textEl.textContent = step.text;
+
+            // Update dots
+            dotsEl.querySelectorAll('.tutorial-dot').forEach((dot, i) => {
+                dot.className = 'tutorial-dot';
+                if (i < idx) dot.classList.add('done');
+                if (i === idx) dot.classList.add('active');
+            });
+
+            // Update button text
+            nextBtn.textContent = idx === STEPS.length - 1 ? "Let's Go!" : 'Next';
+
+            // Position spotlight on target
+            const targetEl = document.querySelector(step.target);
+            if (targetEl && step.position !== 'center') {
+                const rect = targetEl.getBoundingClientRect();
+                const pad = 8;
+                spotlight.style.display = 'block';
+                spotlight.style.top = (rect.top - pad) + 'px';
+                spotlight.style.left = (rect.left - pad) + 'px';
+                spotlight.style.width = (rect.width + pad * 2) + 'px';
+                spotlight.style.height = (rect.height + pad * 2) + 'px';
+                backdrop.style.background = 'transparent';
+
+                // Position card relative to spotlight
+                const cardHeight = 220;
+                if (step.position === 'below') {
+                    const top = rect.bottom + 16;
+                    card.style.top = Math.min(top, window.innerHeight - cardHeight - 16) + 'px';
+                    card.style.bottom = 'auto';
+                } else {
+                    card.style.bottom = (window.innerHeight - rect.top + 16) + 'px';
+                    card.style.top = 'auto';
+                }
+            } else {
+                // Center card, no spotlight
+                spotlight.style.display = 'none';
+                backdrop.style.background = 'rgba(0,0,0,0.75)';
+                card.style.top = '50%';
+                card.style.bottom = 'auto';
+                card.style.transform = 'translate(-50%, -50%)';
+            }
+
+            // Re-trigger card animation
+            card.style.animation = 'none';
+            card.offsetHeight;
+            card.style.animation = '';
+        }
+
+        function next() {
+            HubSFX.click();
+            if (currentStep < STEPS.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                finish();
+            }
+        }
+
+        function finish() {
+            HubSFX.click();
+            localStorage.setItem('bbg_hub_tutorial_done', '1');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.opacity = '';
+                    overlay.style.transition = '';
+                }, 300);
+            }
+        }
+
+        return { start, shouldShow };
+    })();
+
     // ========== MAIN INIT ==========
     function init() {
         // Run profile migration on first load
         ProfileManager.migrateIfNeeded();
 
-        // Set game card URLs from config
+        // Set game card URLs from config, add click SFX
         document.querySelectorAll('[data-game]').forEach(card => {
             const gameId = card.dataset.game;
             if (typeof OTBConfig !== 'undefined') {
                 card.href = OTBConfig.getGameUrl(gameId);
             }
+            card.addEventListener('click', () => HubSFX.click());
         });
 
         // Inject music toggle button into header
@@ -306,6 +562,7 @@
             musicBtn.title = 'Toggle music';
             musicBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                HubSFX.click();
                 HubMusic.toggle();
             });
             brand.appendChild(musicBtn);
@@ -317,6 +574,7 @@
         if (switchBtn) {
             switchBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                HubSFX.click();
                 showProfileSelect();
             });
         }
@@ -354,6 +612,7 @@
                     HubReportCard.takeSnapshot();
                     checkForCelebrations();
                     setTimeout(() => checkDailyLoginBonus(), 600);
+                    setTimeout(() => HubTutorial.start(), 1200);
                 } else if (profiles.length > 1) {
                     // Multiple profiles: always show picker
                     showProfileSelect();
@@ -370,7 +629,10 @@
 
         // Tab navigation
         document.querySelectorAll('.hub-nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            tab.addEventListener('click', () => {
+                HubSFX.click();
+                switchTab(tab.dataset.tab);
+            });
         });
     }
 

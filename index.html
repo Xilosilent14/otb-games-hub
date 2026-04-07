@@ -41,14 +41,14 @@
             <h2 class="add-player-title">New Player</h2>
             <input type="text" id="new-player-name" class="add-player-input" placeholder="Enter name..." maxlength="20" autocomplete="off">
             <div class="add-player-avatars" id="avatar-picker">
-                <button class="avatar-option selected" data-avatar="\u{1F60E}">\u{1F60E}</button>
-                <button class="avatar-option" data-avatar="\u{1F9B8}">\u{1F9B8}</button>
-                <button class="avatar-option" data-avatar="\u{1F680}">\u{1F680}</button>
-                <button class="avatar-option" data-avatar="\u{1F47E}">\u{1F47E}</button>
-                <button class="avatar-option" data-avatar="\u{1F431}">\u{1F431}</button>
-                <button class="avatar-option" data-avatar="\u{1F525}">\u{1F525}</button>
-                <button class="avatar-option" data-avatar="\u2B50">\u2B50</button>
-                <button class="avatar-option" data-avatar="\u{1F308}">\u{1F308}</button>
+                <button class="avatar-option selected" data-avatar="\u{1F60E}" aria-label="Cool face avatar">\u{1F60E}</button>
+                <button class="avatar-option" data-avatar="\u{1F9B8}" aria-label="Superhero avatar">\u{1F9B8}</button>
+                <button class="avatar-option" data-avatar="\u{1F680}" aria-label="Rocket avatar">\u{1F680}</button>
+                <button class="avatar-option" data-avatar="\u{1F47E}" aria-label="Alien avatar">\u{1F47E}</button>
+                <button class="avatar-option" data-avatar="\u{1F431}" aria-label="Cat avatar">\u{1F431}</button>
+                <button class="avatar-option" data-avatar="\u{1F525}" aria-label="Fire avatar">\u{1F525}</button>
+                <button class="avatar-option" data-avatar="\u2B50" aria-label="Star avatar">\u2B50</button>
+                <button class="avatar-option" data-avatar="\u{1F308}" aria-label="Rainbow avatar">\u{1F308}</button>
             </div>
             <div class="add-player-actions">
                 <button class="otb-btn otb-btn-primary" id="create-player-btn">Create!</button>
@@ -78,7 +78,7 @@
                 <div class="hub-xp-bar">
                     <div class="hub-xp-fill" id="xp-fill" style="width: 0%"></div>
                 </div>
-                <div class="hub-stats-row">
+                <div class="hub-stats-row" aria-live="polite">
                     <span class="hub-stat" id="coins-display">🪙 0</span>
                     <span class="hub-stat" id="streak-display">🔥 0 days</span>
                 </div>
@@ -86,17 +86,17 @@
         </header>
 
         <!-- Navigation Tabs -->
-        <nav class="hub-nav" id="hub-nav">
-            <button class="hub-nav-tab active" data-tab="home"><span class="tab-icon">🏠</span> Home</button>
-            <button class="hub-nav-tab" data-tab="trophies"><span class="tab-icon">🏆</span> Trophies</button>
-            <button class="hub-nav-tab" data-tab="shop"><span class="tab-icon">🛍️</span> Shop</button>
-            <button class="hub-nav-tab" data-tab="journey"><span class="tab-icon">🗺️</span> Journey</button>
-            <button class="hub-nav-tab" data-tab="pet"><span class="tab-icon">🐱</span> Pet</button>
-            <button class="hub-nav-tab" data-tab="report"><span class="tab-icon">📊</span> Report</button>
+        <nav class="hub-nav" id="hub-nav" role="tablist" aria-label="Hub sections">
+            <button class="hub-nav-tab active" data-tab="home" role="tab" aria-selected="true" aria-controls="tab-home"><span class="tab-icon" aria-hidden="true">🏠</span> Home</button>
+            <button class="hub-nav-tab" data-tab="trophies" role="tab" aria-selected="false" aria-controls="tab-trophies"><span class="tab-icon" aria-hidden="true">🏆</span> Trophies</button>
+            <button class="hub-nav-tab" data-tab="shop" role="tab" aria-selected="false" aria-controls="tab-shop"><span class="tab-icon" aria-hidden="true">🛍️</span> Shop</button>
+            <button class="hub-nav-tab" data-tab="journey" role="tab" aria-selected="false" aria-controls="tab-journey"><span class="tab-icon" aria-hidden="true">🗺️</span> Journey</button>
+            <button class="hub-nav-tab" data-tab="pet" role="tab" aria-selected="false" aria-controls="tab-pet"><span class="tab-icon" aria-hidden="true">🐱</span> Pet</button>
+            <button class="hub-nav-tab" data-tab="report" role="tab" aria-selected="false" aria-controls="tab-report"><span class="tab-icon" aria-hidden="true">📊</span> Report</button>
         </nav>
 
         <!-- Tab: Home (Games + Challenges + Progress) -->
-        <div class="hub-tab-content active" id="tab-home">
+        <div class="hub-tab-content active" id="tab-home" role="tabpanel" aria-labelledby="tab-home">
             <!-- Daily Challenges -->
             <section class="hub-section" id="daily-challenges"></section>
 
@@ -219,17 +219,17 @@
         </div>
 
         <!-- Tab: Trophy Room -->
-        <div class="hub-tab-content" id="tab-trophies">
+        <div class="hub-tab-content" id="tab-trophies" role="tabpanel" aria-labelledby="tab-trophies">
             <section class="hub-section" id="trophy-room"></section>
         </div>
 
         <!-- Tab: Shop -->
-        <div class="hub-tab-content" id="tab-shop">
+        <div class="hub-tab-content" id="tab-shop" role="tabpanel" aria-labelledby="tab-shop">
             <section class="hub-section" id="coin-shop"></section>
         </div>
 
         <!-- Tab: Journey / Progress Map -->
-        <div class="hub-tab-content" id="tab-journey">
+        <div class="hub-tab-content" id="tab-journey" role="tabpanel" aria-labelledby="tab-journey">
             <section class="hub-section">
                 <h2 class="hub-section-title">Your Learning Journey</h2>
                 <div id="progress-map"></div>
@@ -237,7 +237,7 @@
         </div>
 
         <!-- Tab: Pet -->
-        <div class="hub-tab-content" id="tab-pet">
+        <div class="hub-tab-content" id="tab-pet" role="tabpanel" aria-labelledby="tab-pet">
             <section class="hub-section">
                 <h2 class="hub-section-title">Your Pet Buddy</h2>
                 <div id="pet-area"></div>
@@ -245,7 +245,7 @@
         </div>
 
         <!-- Tab: Report Card -->
-        <div class="hub-tab-content" id="tab-report">
+        <div class="hub-tab-content" id="tab-report" role="tabpanel" aria-labelledby="tab-report">
             <section class="hub-section" id="report-card-area"></section>
         </div>
 
@@ -256,11 +256,26 @@
         </footer>
     </div>
 
+    <!-- First-Time Tutorial Overlay -->
+    <div id="hub-tutorial" class="tutorial-overlay" style="display:none;">
+        <div class="tutorial-backdrop" id="tutorial-backdrop"></div>
+        <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
+        <div class="tutorial-card" id="tutorial-card">
+            <div class="tutorial-step-indicator" id="tutorial-dots"></div>
+            <div class="tutorial-emoji" id="tutorial-emoji"></div>
+            <div class="tutorial-text" id="tutorial-text"></div>
+            <div class="tutorial-buttons">
+                <button class="otb-btn otb-btn-small tutorial-skip" id="tutorial-skip">Skip</button>
+                <button class="otb-btn otb-btn-primary tutorial-next" id="tutorial-next">Next</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PWA Install Banner -->
     <div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,var(--otb-bg-tertiary),var(--otb-bg-secondary));border-top:2px solid var(--otb-coin);padding:12px 20px;z-index:100;text-align:center;">
         <span style="font-family:var(--otb-font-body);color:var(--otb-text);font-size:0.85rem;">Install Blake Boys Gaming for offline play!</span>
         <button id="install-btn" class="otb-btn otb-btn-primary otb-btn-small" style="margin-left:12px;">Install App</button>
-        <button id="install-dismiss" style="background:none;border:none;color:var(--otb-text-muted);margin-left:8px;cursor:pointer;font-size:1rem;">✕</button>
+        <button id="install-dismiss" style="background:none;border:none;color:var(--otb-text-muted);margin-left:8px;cursor:pointer;font-size:1rem;" aria-label="Dismiss install banner">✕</button>
     </div>
 
     <script src="js/otb-config.js"></script>
