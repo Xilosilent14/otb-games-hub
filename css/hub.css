@@ -11,28 +11,83 @@
     min-height: 100vh;
     background: var(--otb-bg-primary);
     padding: 24px;
+    position: relative;
+    overflow: hidden;
 }
+
+/* Floating game emoji background */
+.profile-floating-emojis {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.profile-floating-emoji {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.12;
+    animation: profileEmojiDrift linear infinite;
+    will-change: transform;
+}
+.profile-floating-emoji:nth-child(1) { left: 5%; font-size: 2.2rem; animation-duration: 18s; animation-delay: 0s; }
+.profile-floating-emoji:nth-child(2) { left: 20%; font-size: 1.6rem; animation-duration: 22s; animation-delay: -4s; }
+.profile-floating-emoji:nth-child(3) { left: 38%; font-size: 2.4rem; animation-duration: 20s; animation-delay: -8s; }
+.profile-floating-emoji:nth-child(4) { left: 55%; font-size: 1.8rem; animation-duration: 24s; animation-delay: -2s; }
+.profile-floating-emoji:nth-child(5) { left: 72%; font-size: 2rem;   animation-duration: 19s; animation-delay: -10s; }
+.profile-floating-emoji:nth-child(6) { left: 88%; font-size: 1.5rem; animation-duration: 21s; animation-delay: -6s; }
+
+@keyframes profileEmojiDrift {
+    0%   { transform: translateY(110vh) rotate(0deg); }
+    100% { transform: translateY(-10vh) rotate(360deg); }
+}
+
+/* Content sits above floating emojis */
+.profile-select-header,
+.profile-cards,
+.profile-add-btn {
+    position: relative;
+    z-index: 1;
+}
+
 .profile-select-header {
     text-align: center;
     margin-bottom: 32px;
 }
+
+/* Logo golden glow pulse */
 .profile-select-logo {
     width: 120px;
     height: 120px;
     border-radius: 16px;
     margin-bottom: 16px;
+    animation: logoGoldenPulse 3s ease-in-out infinite;
 }
+@keyframes logoGoldenPulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(255,215,0,0.2), 0 0 24px rgba(255,215,0,0.1); }
+    50%      { box-shadow: 0 0 20px rgba(255,215,0,0.45), 0 0 40px rgba(255,215,0,0.2); }
+}
+
+/* Title fade-in scale animation */
 .profile-select-title {
     font-family: var(--otb-font-heading);
     color: var(--otb-text);
     font-size: 2rem;
+    animation: titleFadeScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
+@keyframes titleFadeScale {
+    0%   { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
 .profile-cards {
     display: flex;
     gap: 24px;
     flex-wrap: wrap;
     justify-content: center;
 }
+
+/* Profile card shimmer + glow */
 .profile-card {
     background: linear-gradient(135deg, var(--otb-bg-secondary), var(--otb-bg-tertiary));
     border: 2px solid rgba(255,255,255,0.1);
@@ -40,13 +95,44 @@
     padding: 32px 40px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     min-width: 200px;
+    position: relative;
+    overflow: hidden;
+    animation: profileCardIn 0.6s ease-out both;
 }
+.profile-card:nth-child(2) { animation-delay: 0.15s; }
+.profile-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes profileCardIn {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Shimmer sweep across card */
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.06) 50%, transparent 100%);
+    animation: cardShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes cardShimmer {
+    0%, 100% { left: -100%; }
+    50%      { left: 100%; }
+}
+
+/* Subtle resting glow */
+.profile-card {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 8px rgba(255,215,0,0.05);
+}
+
 .profile-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-10px) scale(1.03);
     border-color: var(--otb-coin);
-    box-shadow: 0 12px 32px rgba(255,215,0,0.2);
+    box-shadow: 0 16px 40px rgba(255,215,0,0.25), 0 0 20px rgba(255,215,0,0.15);
 }
 .profile-card:active {
     transform: scale(0.95);
@@ -69,6 +155,40 @@
 .profile-add-btn {
     margin-top: 24px;
     opacity: 0.7;
+}
+
+/* Sparkle particles around profile cards */
+.profile-sparkle-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+}
+.profile-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--otb-coin);
+    opacity: 0;
+    animation: sparkleFloat 3s ease-in-out infinite;
+}
+.profile-sparkle:nth-child(1) { top: 30%; left: 15%; animation-delay: 0s; }
+.profile-sparkle:nth-child(2) { top: 50%; left: 80%; animation-delay: 0.8s; }
+.profile-sparkle:nth-child(3) { top: 20%; left: 60%; animation-delay: 1.6s; width: 3px; height: 3px; }
+.profile-sparkle:nth-child(4) { top: 70%; left: 35%; animation-delay: 2.2s; }
+.profile-sparkle:nth-child(5) { top: 40%; left: 90%; animation-delay: 0.4s; width: 3px; height: 3px; }
+.profile-sparkle:nth-child(6) { top: 60%; left: 10%; animation-delay: 1.2s; }
+.profile-sparkle:nth-child(7) { top: 25%; left: 45%; animation-delay: 1.8s; width: 5px; height: 5px; }
+.profile-sparkle:nth-child(8) { top: 75%; left: 70%; animation-delay: 2.6s; }
+
+@keyframes sparkleFloat {
+    0%   { opacity: 0; transform: translateY(0) scale(0); }
+    20%  { opacity: 0.8; transform: translateY(-8px) scale(1); }
+    40%  { opacity: 1; transform: translateY(-16px) scale(1.2); }
+    60%  { opacity: 0.6; transform: translateY(-24px) scale(0.8); }
+    100% { opacity: 0; transform: translateY(-36px) scale(0); }
 }
 
 /* ====== Profile Switcher in Header ====== */
