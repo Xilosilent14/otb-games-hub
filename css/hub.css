@@ -484,3 +484,124 @@ body::before {
     from { opacity: 0; transform: translateY(16px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ============ MUSIC TOGGLE ============ */
+.hub-music-toggle {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+.hub-music-toggle:hover {
+    background: rgba(255,255,255,0.15);
+    transform: scale(1.1);
+}
+.hub-music-toggle:active {
+    transform: scale(0.95);
+}
+
+/* ============ DAILY LOGIN BONUS ============ */
+.login-bonus-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    animation: loginFadeIn 0.3s ease-out;
+}
+.login-bonus-overlay.login-bonus-fadeout {
+    animation: loginFadeOut 0.4s ease-in forwards;
+}
+.login-bonus-card {
+    background: linear-gradient(135deg, var(--otb-bg-secondary), var(--otb-bg-tertiary));
+    border: 2px solid var(--otb-coin);
+    border-radius: 16px;
+    padding: 28px 36px;
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+    animation: bonusPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.3), 0 8px 32px rgba(0,0,0,0.5);
+}
+.login-bonus-emoji {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    animation: bonusBounce 0.6s ease-out 0.3s both;
+}
+.login-bonus-message {
+    font-family: var(--otb-font-heading);
+    font-size: 1.4rem;
+    color: var(--otb-coin);
+    margin-bottom: 4px;
+}
+.login-bonus-streak {
+    font-family: var(--otb-font-body);
+    font-size: 0.85rem;
+    color: var(--otb-text-muted);
+    margin-bottom: 16px;
+}
+.login-bonus-rewards {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.login-bonus-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    animation: rewardSlideUp 0.5s ease-out 0.5s both;
+}
+.login-bonus-reward-icon {
+    font-size: 1.6rem;
+}
+.login-bonus-reward-amount {
+    font-family: var(--otb-font-heading);
+    font-size: 1.3rem;
+    color: var(--otb-text);
+}
+.login-bonus-reward-label {
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.login-bonus-collect {
+    font-size: 1rem;
+    padding: 10px 40px;
+    animation: rewardSlideUp 0.5s ease-out 0.7s both;
+}
+
+@keyframes loginFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes loginFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+@keyframes bonusPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bonusBounce {
+    0% { transform: scale(0) rotate(-20deg); }
+    60% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes rewardSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}

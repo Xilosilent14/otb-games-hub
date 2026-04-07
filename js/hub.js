@@ -1,11 +1,197 @@
 /* ============================================
-   OTB Games Hub — Main Controller v2.0
+   OTB Games Hub — Main Controller v2.1
    Integrates: Shop, Trophies, Challenges,
-   Progress Map, Animations, Report Card, Pet
+   Progress Map, Animations, Report Card, Pet,
+   Daily Login Bonus, Background Music
    ============================================ */
 (() => {
     let currentTab = 'home';
 
+    // ========== BACKGROUND MUSIC SYSTEM ==========
+    const HubMusic = (() => {
+        let ctx = null;
+        let masterGain = null;
+        let bassGain = null;
+        let isPlaying = false;
+        let melodyInterval = null;
+        let bassInterval = null;
+        let enabled = localStorage.getItem('bbg_hub_music') !== 'off';
+
+        // C major pentatonic: C4, D4, E4, G4, A4, C5
+        const MELODY_NOTES = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+        const BASS_NOTES = [130.81, 146.83, 164.81]; // C3, D3, E3
+        const TEMPO_MS = Math.round(60000 / 70); // 70 BPM
+
+        function initAudio() {
+            if (ctx) return;
+            try {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = ctx.createGain();
+                masterGain.gain.value = 0.15;
+                masterGain.connect(ctx.destination);
+                bassGain = ctx.createGain();
+                bassGain.gain.value = 0.08;
+                bassGain.connect(ctx.destination);
+            } catch (e) {
+                console.warn('[Hub Music] Web Audio not available:', e);
+            }
+        }
+
+        function playNote(freq, gainNode, duration) {
+            if (!ctx || !gainNode) return;
+            const osc = ctx.createOscillator();
+            const noteGain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            noteGain.gain.setValueAtTime(0, ctx.currentTime);
+            noteGain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.08);
+            noteGain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+            osc.connect(noteGain);
+            noteGain.connect(gainNode);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + duration + 0.05);
+        }
+
+        function startMelody() {
+            if (melodyInterval) return;
+            let noteIndex = 0;
+            // Play a note every beat with gentle wandering
+            function tick() {
+                // Pick a random pentatonic note, biased toward stepwise motion
+                const step = Math.random() < 0.6 ? 1 : Math.floor(Math.random() * 3);
+                noteIndex = (noteIndex + step) % MELODY_NOTES.length;
+                playNote(MELODY_NOTES[noteIndex], masterGain, TEMPO_MS / 1000 * 1.8);
+
+                // Schedule next note with slight swing
+                const swing = TEMPO_MS + (Math.random() - 0.5) * 200;
+                melodyInterval = setTimeout(tick, swing);
+            }
+            tick();
+        }
+
+        function startBass() {
+            if (bassInterval) return;
+            let bassIndex = 0;
+            function tick() {
+                playNote(BASS_NOTES[bassIndex], bassGain, TEMPO_MS / 1000 * 3.5);
+                bassIndex = (bassIndex + 1) % BASS_NOTES.length;
+                bassInterval = setTimeout(tick, TEMPO_MS * 4);
+            }
+            tick();
+        }
+
+        function start() {
+            if (isPlaying || !enabled) return;
+            initAudio();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();
+            isPlaying = true;
+            startMelody();
+            startBass();
+        }
+
+        function stop() {
+            isPlaying = false;
+            if (melodyInterval) { clearTimeout(melodyInterval); melodyInterval = null; }
+            if (bassInterval) { clearTimeout(bassInterval); bassInterval = null; }
+        }
+
+        function toggle() {
+            enabled = !enabled;
+            localStorage.setItem('bbg_hub_music', enabled ? 'on' : 'off');
+            if (enabled) { start(); } else { stop(); }
+            updateToggleBtn();
+            return enabled;
+        }
+
+        function updateToggleBtn() {
+            const btn = document.getElementById('music-toggle');
+            if (btn) btn.textContent = enabled ? '\u{1F3B5}' : '\u{1F507}';
+        }
+
+        return { start, stop, toggle, updateToggleBtn, isEnabled: () => enabled };
+    })();
+
+    // ========== DAILY LOGIN BONUS ==========
+    function checkDailyLoginBonus() {
+        if (typeof OTBEcosystem === 'undefined') return;
+        const profile = OTBEcosystem.getProfile();
+        const today = new Date().toISOString().split('T')[0];
+        const lastLogin = localStorage.getItem('bbg_last_login_bonus');
+
+        if (lastLogin === today) return; // Already claimed today
+
+        localStorage.setItem('bbg_last_login_bonus', today);
+
+        // Calculate reward based on streak
+        const streak = profile.dailyStreak || 1;
+        let coins, xp, message, emoji;
+
+        if (streak >= 7) {
+            coins = 20; xp = 50; message = 'Week Warrior!'; emoji = '\u{1F3C6}';
+        } else if (streak >= 5) {
+            coins = 15; xp = 30; message = 'On fire!'; emoji = '\u{1F525}';
+        } else if (streak >= 3) {
+            coins = 10; xp = 20; message = 'Great streak!'; emoji = '\u2B50';
+        } else {
+            coins = 5; xp = 10; message = 'Welcome back!'; emoji = '\u{1F44B}';
+        }
+
+        OTBEcosystem.addCoins(coins, 'daily-login');
+        const xpResult = OTBEcosystem.addXP(xp, 'daily-login');
+
+        showLoginBonus(coins, xp, message, emoji, streak, xpResult.leveledUp);
+    }
+
+    function showLoginBonus(coins, xp, message, emoji, streak, leveledUp) {
+        // Build modal dynamically
+        const overlay = document.createElement('div');
+        overlay.className = 'login-bonus-overlay';
+        overlay.innerHTML = `
+            <div class="login-bonus-card">
+                <div class="login-bonus-emoji">${emoji}</div>
+                <div class="login-bonus-message">${message}</div>
+                <div class="login-bonus-streak">${streak} day streak</div>
+                <div class="login-bonus-rewards">
+                    <div class="login-bonus-reward">
+                        <span class="login-bonus-reward-icon">\u{1FA99}</span>
+                        <span class="login-bonus-reward-amount">+${coins}</span>
+                        <span class="login-bonus-reward-label">Coins</span>
+                    </div>
+                    <div class="login-bonus-reward">
+                        <span class="login-bonus-reward-icon">\u2728</span>
+                        <span class="login-bonus-reward-amount">+${xp}</span>
+                        <span class="login-bonus-reward-label">XP</span>
+                    </div>
+                </div>
+                <button class="login-bonus-collect otb-btn otb-btn-primary">Collect!</button>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        // Fire confetti and coin rain
+        setTimeout(() => {
+            HubAnimations.confetti(3000);
+            HubAnimations.coinRain(coins);
+        }, 300);
+
+        // Collect button
+        const collectBtn = overlay.querySelector('.login-bonus-collect');
+        function dismiss() {
+            overlay.classList.add('login-bonus-fadeout');
+            setTimeout(() => overlay.remove(), 400);
+            loadProfile(); // Refresh coin/xp display
+            if (leveledUp) {
+                setTimeout(() => HubAnimations.levelUp(OTBEcosystem.getLevelInfo().level), 500);
+            }
+        }
+        collectBtn.addEventListener('click', dismiss);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) dismiss(); });
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => { if (overlay.parentNode) dismiss(); }, 5000);
+    }
+
+    // ========== MAIN INIT ==========
     function init() {
         // Set game card URLs from config
         document.querySelectorAll('[data-game]').forEach(card => {
@@ -14,6 +200,30 @@
                 card.href = OTBConfig.getGameUrl(gameId);
             }
         });
+
+        // Inject music toggle button into header
+        const brand = document.querySelector('.hub-brand');
+        if (brand) {
+            const musicBtn = document.createElement('button');
+            musicBtn.id = 'music-toggle';
+            musicBtn.className = 'hub-music-toggle';
+            musicBtn.title = 'Toggle music';
+            musicBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                HubMusic.toggle();
+            });
+            brand.appendChild(musicBtn);
+            HubMusic.updateToggleBtn();
+        }
+
+        // Start music on first user interaction
+        const startMusicOnce = () => {
+            HubMusic.start();
+            document.removeEventListener('click', startMusicOnce);
+            document.removeEventListener('touchstart', startMusicOnce);
+        };
+        document.addEventListener('click', startMusicOnce);
+        document.addEventListener('touchstart', startMusicOnce);
 
         // Splash timeout
         setTimeout(() => {
@@ -28,6 +238,8 @@
                 checkGameAvailability();
                 HubReportCard.takeSnapshot();
                 checkForCelebrations();
+                // Daily login bonus after everything loads
+                setTimeout(() => checkDailyLoginBonus(), 600);
             }, 500);
         }, 1800);
 
