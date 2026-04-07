@@ -342,11 +342,11 @@ body::before {
 
 /* ============ HEADER ============ */
 .hub-header {
-    background: linear-gradient(135deg, var(--otb-bg-tertiary), var(--otb-bg-secondary));
-    padding: 8px 16px;
+    background: linear-gradient(135deg, #0a1628, #162040 40%, #1a2850 60%, #0a1628);
+    padding: 6px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     position: sticky;
     top: 0;
@@ -356,15 +356,23 @@ body::before {
 .hub-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    flex: 1;
 }
 
 .hub-banner-img {
-    height: 56px;
+    height: 64px;
     width: auto;
-    max-width: 400px;
+    max-width: 600px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.hub-player {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .hub-brand-logo {
