@@ -343,7 +343,7 @@ body::before {
 /* ============ HEADER ============ */
 .hub-header {
     background: linear-gradient(135deg, #0a1628, #162040 40%, #1a2850 60%, #0a1628);
-    padding: 6px 16px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -362,11 +362,11 @@ body::before {
 
 .hub-banner-img {
     height: auto;
-    width: 100%;
-    max-width: 700px;
-    max-height: 70px;
+    width: auto;
+    max-width: 500px;
+    max-height: 120px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
 }
 
 .hub-player {
