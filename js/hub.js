@@ -614,8 +614,20 @@
                     setTimeout(() => checkDailyLoginBonus(), 600);
                     setTimeout(() => HubTutorial.start(), 1200);
                 } else if (profiles.length > 1) {
-                    // Multiple profiles: always show picker
-                    showProfileSelect();
+                    // If returning from a game (hash #home), skip picker and use active profile
+                    const skipPicker = window.location.hash === '#home' || new URLSearchParams(window.location.search).has('skip');
+                    if (skipPicker && activeId) {
+                        document.getElementById('hub').style.display = 'block';
+                        loadProfile();
+                        loadHomeTab();
+                        applyTheme();
+                        checkGameAvailability();
+                        HubReportCard.takeSnapshot();
+                        checkForCelebrations();
+                        setTimeout(() => checkDailyLoginBonus(), 600);
+                    } else {
+                        showProfileSelect();
+                    }
                 } else {
                     // No profiles at all (shouldn't happen after migration, but fallback)
                     document.getElementById('hub').style.display = 'block';
