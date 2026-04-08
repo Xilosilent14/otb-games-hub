@@ -361,9 +361,10 @@ body::before {
 }
 
 .hub-banner-img {
-    height: 64px;
-    width: auto;
-    max-width: 600px;
+    height: auto;
+    width: 100%;
+    max-width: 700px;
+    max-height: 70px;
     object-fit: contain;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
