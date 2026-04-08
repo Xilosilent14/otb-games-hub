@@ -664,6 +664,7 @@
         // Load tab content
         if (tabId === 'home') loadHomeTab();
         else if (tabId === 'progress') { loadReport(); loadTrophies(); }
+        else if (tabId === 'pet') { loadPet(); }
         else if (tabId === 'shop') loadShop();
     }
 
