@@ -894,3 +894,12 @@
 
     document.addEventListener('DOMContentLoaded', init);
 })();
+
+// Global error handler for Hub resilience
+window.onerror = function(msg, source, line, col, error) {
+    console.error('Hub error:', msg, 'at', source, line + ':' + col);
+    return false;
+};
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Hub unhandled rejection:', event.reason);
+});
