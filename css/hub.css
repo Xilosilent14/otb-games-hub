@@ -624,6 +624,27 @@ body::before {
     border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
+/* Game card progress bar + last played */
+.hub-game-progress {
+    margin-top: 6px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.hub-game-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--card-accent, var(--otb-coin));
+    transition: width 0.6s ease;
+}
+.hub-game-last-played {
+    font-size: 0.6rem;
+    color: var(--otb-text-dim);
+    margin-top: 4px;
+    font-family: var(--otb-font-body);
+}
+
 .hub-game-locked {
     opacity: 0.5;
     pointer-events: none;
@@ -790,14 +811,14 @@ body::before {
     }
 }
 
-/* Fire tablet (1024x600) sweet spot: 3 columns, compact cards */
+/* Fire tablet (1024x600) sweet spot: 3 columns, bigger cards */
 @media (min-width: 768px) and (max-width: 1100px) {
     .hub-games-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        gap: 12px;
     }
-    .hub-game-banner { height: 90px; }
-    .hub-game-info { padding: 6px 10px; }
+    .hub-game-banner { height: 110px; }
+    .hub-game-info { padding: 8px 12px; }
     .hub-game-desc { margin-bottom: 4px; }
     .hub-section { padding: 8px 16px; }
     .hub-section-title { margin-bottom: 6px; font-size: 0.95rem; }

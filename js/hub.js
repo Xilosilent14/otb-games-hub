@@ -651,11 +651,8 @@
 
         // Load tab content
         if (tabId === 'home') loadHomeTab();
-        else if (tabId === 'trophies') loadTrophies();
+        else if (tabId === 'progress') { loadReport(); loadTrophies(); }
         else if (tabId === 'shop') loadShop();
-        else if (tabId === 'journey') loadJourney();
-        else if (tabId === 'pet') loadPet();
-        else if (tabId === 'report') loadReport();
     }
 
     function getGreeting(name) {
@@ -674,6 +671,44 @@
 
         // Add NEW badges to potion-lab and spidey-academy cards
         addNewBadges();
+
+        // Populate progress bars and last-played from ecosystem data
+        updateGameCardProgress();
+    }
+
+    function updateGameCardProgress() {
+        const profile = typeof OTBEcosystem !== 'undefined' ? OTBEcosystem.getProfile() : null;
+        if (!profile) return;
+        const gameMap = {
+            'card-thinkfast': 'think-fast',
+            'card-wordmine': 'word-mine',
+            'card-rhythmblast': 'rhythm-blast',
+            'card-potionlab': 'potion-lab',
+            'card-creaturecards': 'creature-cards',
+            'card-spideyacademy': 'spidey-academy'
+        };
+        Object.entries(gameMap).forEach(([cardId, gameId]) => {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            const gameData = profile.games && profile.games[gameId];
+            const fill = card.querySelector('.hub-game-progress-fill');
+            const lastEl = card.querySelector('.hub-game-last-played');
+            if (gameData) {
+                // Progress: use level or XP-based percentage (cap at 100)
+                const pct = Math.min(100, Math.floor((gameData.xp || 0) / 50));
+                if (fill) fill.style.width = pct + '%';
+                // Last played
+                if (lastEl && gameData.lastPlayed) {
+                    const d = new Date(gameData.lastPlayed);
+                    const now = new Date();
+                    const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+                    if (diff === 0) lastEl.textContent = 'Played today';
+                    else if (diff === 1) lastEl.textContent = 'Played yesterday';
+                    else if (diff < 7) lastEl.textContent = `Played ${diff} days ago`;
+                    else lastEl.textContent = '';
+                }
+            }
+        });
     }
 
     function addNewBadges() {

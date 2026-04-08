@@ -107,11 +107,8 @@
         <!-- Navigation Tabs -->
         <nav class="hub-nav" id="hub-nav" role="tablist" aria-label="Hub sections">
             <button class="hub-nav-tab active" data-tab="home" role="tab" aria-selected="true" aria-controls="tab-home"><span class="tab-icon" aria-hidden="true">🏠</span> Home</button>
-            <button class="hub-nav-tab" data-tab="trophies" role="tab" aria-selected="false" aria-controls="tab-trophies"><span class="tab-icon" aria-hidden="true">🏆</span> Trophies</button>
+            <button class="hub-nav-tab" data-tab="progress" role="tab" aria-selected="false" aria-controls="tab-progress"><span class="tab-icon" aria-hidden="true">🏆</span> My Progress</button>
             <button class="hub-nav-tab" data-tab="shop" role="tab" aria-selected="false" aria-controls="tab-shop"><span class="tab-icon" aria-hidden="true">🛍️</span> Shop</button>
-            <button class="hub-nav-tab" data-tab="journey" role="tab" aria-selected="false" aria-controls="tab-journey"><span class="tab-icon" aria-hidden="true">🗺️</span> Journey</button>
-            <button class="hub-nav-tab" data-tab="pet" role="tab" aria-selected="false" aria-controls="tab-pet"><span class="tab-icon" aria-hidden="true">🐱</span> Pet</button>
-            <button class="hub-nav-tab" data-tab="report" role="tab" aria-selected="false" aria-controls="tab-report"><span class="tab-icon" aria-hidden="true">📊</span> Report</button>
         </nav>
 
         <!-- Tab: Home (Games + Challenges) -->
@@ -131,6 +128,8 @@
                                 <span class="hub-game-tag tag-math">Math</span>
                                 <span class="hub-game-tag tag-reading">Reading</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                     <a href="#" class="hub-game-card" id="card-wordmine" data-game="word-mine">
@@ -144,6 +143,8 @@
                                 <span class="hub-game-tag tag-reading">Sight Words</span>
                                 <span class="hub-game-tag tag-math">Math</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                     <a href="#" class="hub-game-card" id="card-rhythmblast" data-game="rhythm-blast">
@@ -157,6 +158,8 @@
                                 <span class="hub-game-tag tag-math">Math</span>
                                 <span class="hub-game-tag tag-reading">Reading</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                     <a href="#" class="hub-game-card" id="card-potionlab" data-game="potion-lab">
@@ -170,6 +173,8 @@
                                 <span class="hub-game-tag tag-reading">Colors</span>
                                 <span class="hub-game-tag tag-math">Counting</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                     <a href="#" class="hub-game-card" id="card-creaturecards" data-game="creature-cards">
@@ -183,6 +188,8 @@
                                 <span class="hub-game-tag tag-math">Math</span>
                                 <span class="hub-game-tag tag-reading">Reading</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                     <a href="#" class="hub-game-card" id="card-spideyacademy" data-game="spidey-academy">
@@ -196,6 +203,8 @@
                                 <span class="hub-game-tag tag-reading">Colors</span>
                                 <span class="hub-game-tag tag-math">Shapes</span>
                             </div>
+                            <div class="hub-game-progress"><div class="hub-game-progress-fill" style="width:0%"></div></div>
+                            <div class="hub-game-last-played"></div>
                         </div>
                     </a>
                 </div>
@@ -205,9 +214,10 @@
             <section class="hub-section hub-section-challenges" id="daily-challenges"></section>
         </div>
 
-        <!-- Tab: Trophy Room -->
-        <div class="hub-tab-content" id="tab-trophies" role="tabpanel" aria-labelledby="tab-trophies">
-            <section class="hub-section" id="trophy-room"></section>
+        <!-- Tab: My Progress (merged Trophies + Report) -->
+        <div class="hub-tab-content" id="tab-progress" role="tabpanel" aria-labelledby="tab-progress">
+            <section class="hub-section" id="report-card-area"></section>
+            <section class="hub-section" id="trophy-room" style="margin-top: 12px;"></section>
         </div>
 
         <!-- Tab: Shop -->
@@ -215,31 +225,10 @@
             <section class="hub-section" id="coin-shop"></section>
         </div>
 
-        <!-- Tab: Journey / Progress Map -->
-        <div class="hub-tab-content" id="tab-journey" role="tabpanel" aria-labelledby="tab-journey">
-            <section class="hub-section">
-                <h2 class="hub-section-title">Your Learning Journey</h2>
-                <div id="progress-map"></div>
-            </section>
-        </div>
-
-        <!-- Tab: Pet -->
-        <div class="hub-tab-content" id="tab-pet" role="tabpanel" aria-labelledby="tab-pet">
-            <section class="hub-section">
-                <h2 class="hub-section-title">Your Pet Buddy</h2>
-                <div id="pet-area"></div>
-            </section>
-        </div>
-
-        <!-- Tab: Report Card -->
-        <div class="hub-tab-content" id="tab-report" role="tabpanel" aria-labelledby="tab-report">
-            <section class="hub-section" id="report-card-area"></section>
-        </div>
-
         <!-- Footer -->
         <footer class="hub-footer">
             <span class="otb-about-text">Blake Boys Gaming</span>
-            <span class="otb-about-version">Hub v2.5</span>
+            <span class="otb-about-version">Hub v3.0</span>
         </footer>
     </div>
 
