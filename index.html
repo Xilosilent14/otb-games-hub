@@ -257,10 +257,10 @@
     </div>
 
     <!-- PWA Install Banner (top, highly visible for tablets) -->
-    <div id="install-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#e94560,#ff6b6b);padding:10px 20px;z-index:9999;align-items:center;justify-content:center;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,0.4);">
-        <span style="font-family:var(--otb-font-body);color:#fff;font-size:1rem;font-weight:600;">📲 Install BBG for full-screen play!</span>
-        <button id="install-btn" style="background:#fff;color:#e94560;border:none;border-radius:8px;padding:8px 20px;font-family:var(--otb-font-heading);font-size:0.9rem;font-weight:700;cursor:pointer;">Install App</button>
-        <button id="install-dismiss" style="background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.2rem;padding:4px 8px;" aria-label="Dismiss">✕</button>
+    <div id="install-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#e94560,#ff6b6b);padding:10px 20px;z-index:9999;align-items:center;justify-content:center;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,0.4);flex-wrap:wrap;">
+        <span id="install-text" style="font-family:var(--otb-font-body);color:#fff;font-size:1rem;font-weight:600;">📲 Install BBG for full-screen play!</span>
+        <button id="install-btn" style="background:#fff;color:#e94560;border:none;border-radius:8px;padding:8px 20px;font-family:var(--otb-font-heading);font-size:0.9rem;font-weight:700;cursor:pointer;min-height:44px;">Install App</button>
+        <button id="install-dismiss" style="background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.2rem;padding:4px 8px;min-height:44px;" aria-label="Dismiss">✕</button>
     </div>
 
     <script src="js/otb-config.js"></script>
@@ -277,24 +277,61 @@
         // Service Worker
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
-        // PWA Install Prompt
+        // PWA Install Prompt — supports Chrome (beforeinstallprompt) + Silk/other browsers (manual)
         let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installBtn = document.getElementById('install-btn');
+        const installText = document.getElementById('install-text');
+        const dismissed = sessionStorage.getItem('bbg_install_dismissed');
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('install-banner').style.display = 'flex';
+            if (!dismissed && !window.matchMedia('(display-mode: standalone)').matches) {
+                installBanner.style.display = 'flex';
+            }
         });
-        document.getElementById('install-btn')?.addEventListener('click', () => {
+
+        // Fallback for browsers without beforeinstallprompt (Amazon Silk, Firefox, Safari)
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isStandalone || dismissed) return;
+            // If beforeinstallprompt didn't fire within 2s, show manual instructions
+            setTimeout(() => {
+                if (!deferredPrompt && installBanner.style.display === 'none') {
+                    const ua = navigator.userAgent.toLowerCase();
+                    if (ua.includes('silk')) {
+                        installText.textContent = '📲 Tap the menu (⋮) then "Add to Home Screen" for full-screen play!';
+                        installBtn.textContent = 'Got it';
+                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
+                    } else if (ua.includes('firefox')) {
+                        installText.textContent = '📲 Tap the menu (⋮) then "Install" for full-screen play!';
+                        installBtn.textContent = 'Got it';
+                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
+                    } else if (ua.includes('safari') && !ua.includes('chrome')) {
+                        installText.textContent = '📲 Tap Share then "Add to Home Screen" for full-screen play!';
+                        installBtn.textContent = 'Got it';
+                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
+                    } else {
+                        return; // Unknown browser, don't show
+                    }
+                    installBanner.style.display = 'flex';
+                }
+            }, 2000);
+        });
+
+        installBtn?.addEventListener('click', () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(() => {
                     deferredPrompt = null;
-                    document.getElementById('install-banner').style.display = 'none';
+                    installBanner.style.display = 'none';
                 });
             }
         });
         document.getElementById('install-dismiss')?.addEventListener('click', () => {
-            document.getElementById('install-banner').style.display = 'none';
+            installBanner.style.display = 'none';
+            sessionStorage.setItem('bbg_install_dismissed', '1');
         });
     </script>
 </body>

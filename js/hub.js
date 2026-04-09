@@ -772,10 +772,23 @@
 
     function checkGameAvailability() {
         document.querySelectorAll('[data-game]').forEach(card => {
-            const url = card.href;
-            if (!url || url === '#') return;
+            const rawHref = card.getAttribute('href');
+            if (!rawHref || rawHref === '#') return;
+            const url = card.href; // fully resolved
+            // Same-origin games (production sub-paths) are always available
+            try {
+                const gameOrigin = new URL(url).origin;
+                if (gameOrigin === window.location.origin) {
+                    card.classList.remove('hub-game-offline');
+                    return;
+                }
+            } catch(e) {}
+            // Cross-origin: try to reach the game (local dev with separate ports)
             fetch(url, { mode: 'no-cors', cache: 'no-cache' })
-                .then(() => { card.classList.remove('hub-game-offline'); })
+                .then(r => {
+                    // no-cors gives opaque response (type 'opaque', status 0) on success
+                    card.classList.remove('hub-game-offline');
+                })
                 .catch(() => {
                     card.classList.add('hub-game-offline');
                     const info = card.querySelector('.hub-game-desc');
