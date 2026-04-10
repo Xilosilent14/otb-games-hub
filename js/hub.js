@@ -807,10 +807,12 @@
         // Player info from active profile
         const nameEl = document.getElementById('player-name');
         const activeProfile = typeof ProfileManager !== 'undefined' ? ProfileManager.getActiveProfile() : null;
-        if (activeProfile) {
-            nameEl.textContent = activeProfile.name;
-        } else if (profile.playerName) {
-            nameEl.textContent = profile.playerName;
+        if (nameEl) {
+            if (activeProfile) {
+                nameEl.textContent = activeProfile.name;
+            } else if (profile.playerName) {
+                nameEl.textContent = profile.playerName;
+            }
         }
 
         // Avatar: use profile avatar, fallback to shop avatar
@@ -825,22 +827,28 @@
 
         // Name color
         const eq = HubShop.getEquipped();
-        if (eq.nameColor === 'rainbow') {
-            nameEl.classList.add('rainbow');
-            nameEl.style.color = '';
-        } else {
-            nameEl.classList.remove('rainbow');
-            nameEl.style.color = eq.nameColor || 'var(--otb-coin)';
+        if (nameEl) {
+            if (eq.nameColor === 'rainbow') {
+                nameEl.classList.add('rainbow');
+                nameEl.style.color = '';
+            } else {
+                nameEl.classList.remove('rainbow');
+                nameEl.style.color = eq.nameColor || 'var(--otb-coin)';
+            }
         }
 
         // Title
         const titleEl = document.getElementById('player-title');
         if (titleEl) titleEl.textContent = eq.title || '';
 
-        document.getElementById('player-level').textContent = `Lv. ${level.level}`;
-        document.getElementById('xp-fill').style.width = (level.progress * 100) + '%';
-        document.getElementById('coins-display').textContent = `🪙 ${profile.coins}`;
-        document.getElementById('streak-display').textContent = `🔥 ${streak.streak} day${streak.streak !== 1 ? 's' : ''}`;
+        const levelEl = document.getElementById('player-level');
+        if (levelEl) levelEl.textContent = `Lv. ${level.level}`;
+        const xpFill = document.getElementById('xp-fill');
+        if (xpFill) xpFill.style.width = (level.progress * 100) + '%';
+        const coinsEl = document.getElementById('coins-display');
+        if (coinsEl) coinsEl.textContent = `🪙 ${profile.coins}`;
+        const streakEl = document.getElementById('streak-display');
+        if (streakEl) streakEl.textContent = `🔥 ${streak.streak} day${streak.streak !== 1 ? 's' : ''}`;
 
         // Progress bars (only if elements exist, moved to Report tab)
         const mathPct = Math.round(summary.mathAccuracy * 100);
