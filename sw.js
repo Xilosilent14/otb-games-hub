@@ -1,5 +1,5 @@
 // Blake Boys Gaming Hub — Service Worker v3.1
-const CACHE_NAME = 'bbg-hub-v13';
+const CACHE_NAME = 'bbg-hub-v14';
 const ASSETS = [
     './',
     './index.html',

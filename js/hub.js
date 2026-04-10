@@ -80,18 +80,30 @@
             tick();
         }
 
+        // MP3 background music
+        let _bgmAudio = null;
+
         function start() {
             if (isPlaying || !enabled) return;
-            initAudio();
-            if (!ctx) return;
-            if (ctx.state === 'suspended') ctx.resume();
             isPlaying = true;
-            startMelody();
-            startBass();
+            // Play MP3 loop instead of synth
+            if (!_bgmAudio) {
+                _bgmAudio = new Audio('assets/sounds/music/bgm-hub.mp3');
+                _bgmAudio.loop = true;
+                _bgmAudio.volume = 0.15;
+            }
+            _bgmAudio.play().catch(() => {
+                // Fallback to synth if MP3 fails
+                initAudio();
+                if (ctx && ctx.state === 'suspended') ctx.resume();
+                startMelody();
+                startBass();
+            });
         }
 
         function stop() {
             isPlaying = false;
+            if (_bgmAudio) { _bgmAudio.pause(); _bgmAudio.currentTime = 0; }
             if (melodyInterval) { clearTimeout(melodyInterval); melodyInterval = null; }
             if (bassInterval) { clearTimeout(bassInterval); bassInterval = null; }
         }
