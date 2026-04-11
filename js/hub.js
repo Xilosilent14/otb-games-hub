@@ -88,7 +88,7 @@
             isPlaying = true;
             // Play MP3 loop instead of synth
             if (!_bgmAudio) {
-                _bgmAudio = new Audio('assets/sounds/music/bgm-hub.mp3');
+                _bgmAudio = document.createElement('audio'); _bgmAudio.src = 'assets/sounds/music/bgm-hub.mp3';
                 _bgmAudio.loop = true;
                 _bgmAudio.volume = 0.15;
             }
