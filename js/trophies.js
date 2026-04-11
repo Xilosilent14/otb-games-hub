@@ -84,7 +84,7 @@ const HubTrophies = (() => {
         // Hub / Cross-game achievements
         'hub': {
             icon: '🎮',
-            name: 'OTB Hub',
+            name: 'BBG Hub',
             color: '#4A90D9',
             trophies: [
                 { id: 'first-game', name: 'Player One', desc: 'Play your first game', icon: '🎮' },
