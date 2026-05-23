@@ -1,0 +1,87 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: microphone=(), camera=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob: data: https://texttospeech.googleapis.com; connect-src 'self' https://texttospeech.googleapis.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+# HTML — always re-validate so deploys take effect immediately
+/
+  Cache-Control: no-cache, must-revalidate
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# Version manifest — never cache
+/version.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Service workers — scope to root, never cache the SW file itself
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/thinkfast/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/wordmine/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/rhythmblast/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/creaturecards/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/spidey/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/potionlab/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Manifests — short cache
+/manifest.json
+  Cache-Control: public, max-age=3600
+
+/*/manifest.json
+  Cache-Control: public, max-age=3600
+
+# Shared CSS — moderate cache (we bump file content, not filename)
+/css/shared/*
+  Cache-Control: public, max-age=86400
+
+# Fonts — long cache, immutable (woff2 content addressed by design)
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/css/shared/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Icons + images — week cache
+/icons/*
+  Cache-Control: public, max-age=604800
+
+/assets/*
+  Cache-Control: public, max-age=604800
+
+/*/assets/*
+  Cache-Control: public, max-age=604800
+
+# Audio — long cache (filenames are stable per release)
+/*.mp3
+  Cache-Control: public, max-age=604800
+
+/*.ogg
+  Cache-Control: public, max-age=604800
+
+# Per-game JS/CSS — moderate cache (SW handles freshness via version bump)
+/*/css/*
+  Cache-Control: public, max-age=86400
+
+/*/js/*
+  Cache-Control: public, max-age=86400

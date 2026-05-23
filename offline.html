@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Offline — Blake Boys Gaming</title>
+    <link rel="stylesheet" href="/css/shared/design-system.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: var(--otb-font-body, 'Nunito', sans-serif);
+            background: linear-gradient(180deg, var(--otb-bg-tertiary, #0f3460) 0%, var(--otb-bg-primary, #1a1a2e) 60%, var(--otb-bg-secondary, #16213e) 100%);
+            color: var(--otb-text, #f0f0f0);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .wrap { max-width: 480px; }
+        h1 {
+            font-family: var(--otb-font-heading, 'Fredoka One', sans-serif);
+            color: var(--otb-coin, #ffd700);
+            font-size: 2rem;
+            margin: 0 0 12px;
+        }
+        p {
+            font-size: 1rem;
+            color: var(--otb-text-muted, #aaa);
+            margin: 8px 0;
+        }
+        button {
+            margin-top: 24px;
+            font-family: var(--otb-font-body, 'Nunito', sans-serif);
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+            background: linear-gradient(135deg, #4A90D9, #3570B0);
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            min-height: 48px;
+            min-width: 48px;
+            cursor: pointer;
+        }
+        .icon { font-size: 4rem; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="icon" aria-hidden="true">🎮</div>
+        <h1>You are offline</h1>
+        <p>Some games still work offline once they have been played at least once.</p>
+        <p>Reconnect to load new content.</p>
+        <button id="retry">Try Again</button>
+    </div>
+    <script src="/js/otb-config.js"></script>
+    <script>
+        document.getElementById('retry').onclick = function() {
+            window.location.reload();
+        };
+    </script>
+</body>
+</html>
