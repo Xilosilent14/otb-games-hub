@@ -264,13 +264,18 @@ const HubReportCard = (() => {
                 <span>&#128293; ${stats.streak} day streak</span>
             </div>
 
-            <button class="report-show-btn otb-btn otb-btn-primary otb-btn-small" onclick="HubReportCard.showFullScreen()">Show Mom & Dad!</button>
+            <button class="report-show-btn otb-btn otb-btn-primary otb-btn-small" data-action="report-fullscreen">Show Mom & Dad!</button>
         </div>`;
 
-        // Animate bars after render
+        // Animate bars after render + wire data-action button (SES-safe, no inline onclick)
         setTimeout(() => {
             document.querySelectorAll('.report-bar-fill[data-target]').forEach(bar => {
                 bar.style.width = bar.dataset.target + '%';
+            });
+            document.querySelectorAll('[data-action="report-fullscreen"]').forEach(btn => {
+                if (btn.dataset.bound) return;
+                btn.dataset.bound = '1';
+                btn.addEventListener('click', showFullScreen);
             });
         }, 100);
 
