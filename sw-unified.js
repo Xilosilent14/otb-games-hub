@@ -1,7 +1,7 @@
 // Blake Boys Gaming — Unified Service Worker
 // Covers Hub + all games under one origin
 
-const VERSION = '1';
+const VERSION = '2';
 const CACHE_SHARED = 'bbg-shared-v' + VERSION;
 const CACHE_HUB = 'bbg-hub-v' + VERSION;
 const CACHE_GAMES = {
@@ -35,6 +35,7 @@ const HUB_ASSETS = [
     '/index.html',
     '/css/hub.css',
     '/css/hub-features.css',
+    '/css/dashboard.css',
     '/js/animations.js',
     '/js/shop.js',
     '/js/trophies.js',
@@ -43,6 +44,7 @@ const HUB_ASSETS = [
     '/js/reportcard.js',
     '/js/pet.js',
     '/js/hub.js',
+    '/js/dashboard.js',
     '/assets/banner-thinkfast.png',
     '/assets/banner-wordmine.png',
     '/assets/banner-rhythmblast.png',

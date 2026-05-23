@@ -688,6 +688,11 @@
     }
 
     function loadHomeTab() {
+        // Render dashboard panel (greeting, level bar, suggestion, recent mastery)
+        if (window.HubDashboard) {
+            try { window.HubDashboard.render(); } catch (e) { console.warn('Dashboard render failed:', e); }
+        }
+
         // Render daily challenges (compact pill row, no greeting banner)
         const challengeEl = document.getElementById('daily-challenges');
         if (challengeEl) {
@@ -905,6 +910,9 @@
     window.refreshHub = function() {
         loadProfile();
         applyTheme();
+        if (window.HubDashboard) {
+            try { window.HubDashboard.render(); } catch (_) {}
+        }
     };
 
     window.refreshShop = function() {

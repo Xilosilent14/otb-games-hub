@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/shared/design-system.css?v=2">
     <link rel="stylesheet" href="css/hub.css?v=7">
     <link rel="stylesheet" href="css/hub-features.css?v=2">
+    <link rel="stylesheet" href="css/dashboard.css?v=1">
 </head>
 <body>
     <!-- Splash Screen -->
@@ -114,6 +115,8 @@
 
         <!-- Tab: Home (Games + Challenges) -->
         <div class="hub-tab-content active" id="tab-home" role="tabpanel" aria-labelledby="tab-home">
+            <!-- Dashboard panel: greeting + level + suggested next + recent mastery -->
+            <section class="hub-section hub-section-dashboard" id="dashboard-panel" aria-label="Dashboard"></section>
             <!-- Games Grid (hero element — first thing kids see) -->
             <section class="hub-section hub-section-games">
                 <h2 class="hub-section-title">My Games</h2>
@@ -275,6 +278,7 @@
     <script src="js/reportcard.js"></script>
     <script src="js/pet.js"></script>
     <script src="js/hub.js"></script>
+    <script src="js/dashboard.js"></script>
     <script>
         // Service Worker
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');

@@ -1,0 +1,390 @@
+/* ============================================
+   BBG Hub Dashboard Panel
+   Sits above the games grid on Home tab.
+   ============================================ */
+
+#dashboard-panel {
+    padding: 14px 16px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ---- Top row: greeting + level bar ---- */
+.dashboard-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.dashboard-greeting {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1.5px solid var(--otb-border);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 80px;
+}
+
+.dashboard-greeting-text {
+    font-family: var(--otb-font-heading);
+    font-size: 1.55rem;
+    color: var(--otb-text);
+    line-height: 1.1;
+}
+
+.dashboard-greeting-sub {
+    font-family: var(--otb-font-body);
+    color: var(--otb-text-muted);
+    font-size: 0.9rem;
+    margin-top: 2px;
+}
+
+.dashboard-greeting-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dashboard-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    color: var(--otb-text);
+    font-family: var(--otb-font-heading);
+    font-size: 0.95rem;
+    padding: 0 14px;
+    min-height: 48px;
+    border-radius: 24px;
+    line-height: 1;
+}
+
+.dashboard-chip-streak {
+    background: linear-gradient(135deg, rgba(255, 99, 71, 0.18), rgba(255, 215, 0, 0.18));
+    border-color: rgba(255, 165, 0, 0.5);
+}
+
+.dashboard-chip-icon {
+    font-size: 1.2rem;
+}
+
+/* ---- Level bar ---- */
+.dashboard-levelbar {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid var(--otb-border);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    min-height: 80px;
+}
+
+.dashboard-levelbar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.dashboard-levelbar-tag {
+    font-family: var(--otb-font-heading);
+    color: var(--otb-coin);
+    font-size: 1.05rem;
+}
+
+.dashboard-levelbar-xp {
+    font-family: var(--otb-font-body);
+    color: var(--otb-text-muted);
+    font-size: 0.85rem;
+}
+
+.dashboard-levelbar-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--otb-border);
+}
+
+.dashboard-levelbar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--game-accent, #e94560), var(--otb-coin));
+    border-radius: 8px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+/* ---- Row: suggestion + recent mastery ---- */
+.dashboard-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* ---- "Play This Next" card ---- */
+.dashboard-suggest {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(233, 69, 96, 0.18), rgba(255, 107, 107, 0.08));
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    border-radius: 18px;
+    padding: 14px;
+    text-decoration: none;
+    color: var(--otb-text);
+    min-height: 130px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(255, 215, 0, 0.0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.dashboard-suggest::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.18), transparent 60%);
+    pointer-events: none;
+}
+
+.dashboard-suggest:hover,
+.dashboard-suggest:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 215, 0, 0.55);
+    outline: none;
+}
+
+.dashboard-suggest:active {
+    transform: translateY(0);
+}
+
+.dashboard-suggest-banner {
+    flex: 0 0 110px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    background-size: cover;
+    background-position: center;
+    /* Reuse banner classes from hub.css (thinkfast-banner, etc.) */
+}
+
+.dashboard-suggest-emoji {
+    font-size: 3.4rem;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+}
+
+.dashboard-suggest-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-suggest-kicker {
+    font-family: var(--otb-font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--otb-coin);
+    font-weight: 700;
+}
+
+.dashboard-suggest-title {
+    font-family: var(--otb-font-heading);
+    font-size: 1.45rem;
+    color: var(--otb-text);
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-suggest-reason {
+    font-family: var(--otb-font-body);
+    color: var(--otb-text-muted);
+    font-size: 0.85rem;
+    margin-top: -2px;
+}
+
+.dashboard-suggest-cta {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    min-width: 150px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, var(--otb-coin), #ffb700);
+    color: #1a1a2e;
+    font-family: var(--otb-font-heading);
+    font-size: 1.2rem;
+    font-weight: 800;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.45);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+}
+
+/* ---- Recently mastered ribbon ---- */
+.dashboard-recent {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid var(--otb-border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 130px;
+    min-width: 0;
+}
+
+.dashboard-recent-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-recent-title {
+    font-family: var(--otb-font-heading);
+    font-size: 1rem;
+    color: var(--otb-text);
+    margin: 0;
+}
+
+.dashboard-recent-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+}
+
+.dashboard-recent-strip::-webkit-scrollbar { display: none; }
+
+.dashboard-recent-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(74, 143, 63, 0.22), rgba(74, 143, 63, 0.08));
+    border: 1.5px solid rgba(74, 143, 63, 0.5);
+    border-radius: 14px;
+    padding: 8px 12px;
+    min-height: 56px;
+    min-width: 140px;
+}
+
+.dashboard-recent-chip-star {
+    font-size: 1.3rem;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+
+.dashboard-recent-chip-topic {
+    font-family: var(--otb-font-heading);
+    font-size: 0.95rem;
+    color: var(--otb-text);
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 160px;
+}
+
+.dashboard-recent-chip-source {
+    font-family: var(--otb-font-body);
+    font-size: 0.75rem;
+    color: var(--otb-text-muted);
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+.dashboard-recent-empty {
+    align-self: center;
+    color: var(--otb-text-muted);
+    font-family: var(--otb-font-body);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 12px;
+    width: 100%;
+}
+
+/* ---- Empty state (no profile picked) ---- */
+.dashboard-empty {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 2px dashed var(--otb-border);
+    border-radius: 18px;
+    padding: 26px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.dashboard-empty-emoji {
+    font-size: 2.8rem;
+}
+
+.dashboard-empty-title {
+    font-family: var(--otb-font-heading);
+    color: var(--otb-text);
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.dashboard-empty-sub {
+    font-family: var(--otb-font-body);
+    color: var(--otb-text-muted);
+    margin: 0;
+    font-size: 0.95rem;
+    max-width: 360px;
+}
+
+.dashboard-empty-cta {
+    min-height: 56px;
+    min-width: 180px;
+    margin-top: 6px;
+}
+
+/* ---- Compact layout for Fire tablet (1024x600) ---- */
+@media (max-width: 1100px) {
+    .dashboard-top {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .dashboard-suggest {
+        flex-direction: column;
+    }
+    .dashboard-suggest-banner {
+        flex: 0 0 80px;
+        min-height: 80px;
+        width: 100%;
+    }
+    .dashboard-suggest-cta {
+        align-self: stretch;
+    }
+}

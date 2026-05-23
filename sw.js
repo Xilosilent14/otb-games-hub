@@ -1,15 +1,18 @@
-// Blake Boys Gaming Hub — Service Worker v3.1
-const CACHE_NAME = 'bbg-hub-v18';
+// Blake Boys Gaming Hub — Service Worker v3.2
+const CACHE_NAME = 'bbg-hub-v19';
 const ASSETS = [
     './',
     './index.html',
     './css/hub.css',
     './css/hub-features.css',
+    './css/dashboard.css',
     './css/shared/design-system.css',
     './css/shared/fonts/fredoka-one.woff2',
     './css/shared/fonts/nunito-regular.woff2',
     './css/shared/fonts/nunito-semibold.woff2',
     './js/otb-config.js',
+    './js/cloud-tts.js',
+    './js/auto-update.js',
     './js/ecosystem.js',
     './js/animations.js',
     './js/shop.js',
@@ -19,6 +22,7 @@ const ASSETS = [
     './js/reportcard.js',
     './js/pet.js',
     './js/hub.js',
+    './js/dashboard.js',
     './assets/bbg-logo.png',
     './assets/banner-thinkfast.png',
     './assets/banner-wordmine.png',
