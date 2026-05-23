@@ -1,5 +1,5 @@
-// Blake Boys Gaming Hub — Service Worker v3.2
-const CACHE_NAME = 'bbg-hub-v19';
+// Blake Boys Gaming Hub — Service Worker v3.3
+const CACHE_NAME = 'bbg-hub-v20';
 const ASSETS = [
     './',
     './index.html',
@@ -23,6 +23,7 @@ const ASSETS = [
     './js/pet.js',
     './js/hub.js',
     './js/dashboard.js',
+    './js/install-prompt.js',
     './assets/bbg-logo.png',
     './assets/banner-thinkfast.png',
     './assets/banner-wordmine.png',

@@ -279,66 +279,6 @@
     <script src="js/pet.js"></script>
     <script src="js/hub.js"></script>
     <script src="js/dashboard.js"></script>
-    <script>
-        // Service Worker
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-
-        // PWA Install Prompt — supports Chrome (beforeinstallprompt) + Silk/other browsers (manual)
-        let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-        const installBtn = document.getElementById('install-btn');
-        const installText = document.getElementById('install-text');
-        const dismissed = sessionStorage.getItem('bbg_install_dismissed');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (!dismissed && !window.matchMedia('(display-mode: standalone)').matches) {
-                installBanner.style.display = 'flex';
-            }
-        });
-
-        // Fallback for browsers without beforeinstallprompt (Amazon Silk, Firefox, Safari)
-        window.addEventListener('load', () => {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            if (isStandalone || dismissed) return;
-            // If beforeinstallprompt didn't fire within 2s, show manual instructions
-            setTimeout(() => {
-                if (!deferredPrompt && installBanner.style.display === 'none') {
-                    const ua = navigator.userAgent.toLowerCase();
-                    if (ua.includes('silk')) {
-                        installText.textContent = '📲 Tap the menu (⋮) then "Add to Home Screen" for full-screen play!';
-                        installBtn.textContent = 'Got it';
-                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
-                    } else if (ua.includes('firefox')) {
-                        installText.textContent = '📲 Tap the menu (⋮) then "Install" for full-screen play!';
-                        installBtn.textContent = 'Got it';
-                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
-                    } else if (ua.includes('safari') && !ua.includes('chrome')) {
-                        installText.textContent = '📲 Tap Share then "Add to Home Screen" for full-screen play!';
-                        installBtn.textContent = 'Got it';
-                        installBtn.onclick = () => { installBanner.style.display = 'none'; sessionStorage.setItem('bbg_install_dismissed', '1'); };
-                    } else {
-                        return; // Unknown browser, don't show
-                    }
-                    installBanner.style.display = 'flex';
-                }
-            }, 2000);
-        });
-
-        installBtn?.addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    deferredPrompt = null;
-                    installBanner.style.display = 'none';
-                });
-            }
-        });
-        document.getElementById('install-dismiss')?.addEventListener('click', () => {
-            installBanner.style.display = 'none';
-            sessionStorage.setItem('bbg_install_dismissed', '1');
-        });
-    </script>
+    <script src="js/install-prompt.js"></script>
 </body>
 </html>
