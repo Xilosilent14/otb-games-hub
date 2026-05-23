@@ -48,6 +48,19 @@ const ProfileManager = (() => {
         return id ? 'bbg_profile_' + id : 'bbg_shared_profile';
     }
 
+    /**
+     * Build a profile-scoped storage key for ancillary modules
+     * (pet, shop purchases, challenges, etc.) so per-player data
+     * doesn't bleed across profiles. Falls back to legacy global
+     * key when no profile is active.
+     * @param {string} suffix - e.g. 'pet', 'daily_challenges'
+     * @returns {string}
+     */
+    function getScopedKey(suffix) {
+        const id = getActiveProfileId();
+        return id ? `bbg_${suffix}_${id}` : `bbg_${suffix}`;
+    }
+
     function getActiveProfile() {
         const id = getActiveProfileId();
         if (!id) return null;
@@ -95,7 +108,7 @@ const ProfileManager = (() => {
         }));
     }
 
-    return { getProfiles, getActiveProfileId, setActiveProfile, createProfile, getProfileKey, getActiveProfile, migrateIfNeeded };
+    return { getProfiles, getActiveProfileId, setActiveProfile, createProfile, getProfileKey, getScopedKey, getActiveProfile, migrateIfNeeded };
 })();
 
 /**
@@ -130,11 +143,21 @@ const OTBEcosystem = (() => {
             lastPlayDate: null,
             totalPlayTime: 0,
             gamesPlayed: {},
+            // Per-game metadata: { 'think-fast': { lastPlayed: ts, launches: n, xp: 0 } }
+            games: {},
+            // Ring buffer of recently mastered topics, used by the Hub dashboard.
+            // Each entry: { topic, domain, game, masteredAt }
+            recentMastery: [],
             globalAchievements: [],
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
     }
+
+    // Mastery thresholds shared with dashboard.js
+    const MASTERY_MIN_TOTAL = 10;
+    const MASTERY_MIN_ACCURACY = 0.8;
+    const RECENT_MASTERY_MAX = 24;
 
     function _load() {
         // Migration: copy old OTB profile to new BBG key
@@ -208,8 +231,12 @@ const OTBEcosystem = (() => {
             const p = _load();
             const mastery = domain === 'math' ? p.mathMastery : p.readingMastery;
             if (!mastery[topic]) {
-                mastery[topic] = { correct: 0, total: 0, level: 0, lastSeen: null };
+                mastery[topic] = { correct: 0, total: 0, level: 0, lastSeen: null, mastered: false };
             }
+            const wasMastered = mastery[topic].mastered === true ||
+                (mastery[topic].total >= MASTERY_MIN_TOTAL &&
+                 mastery[topic].correct / mastery[topic].total >= MASTERY_MIN_ACCURACY);
+
             mastery[topic].total++;
             if (correct) mastery[topic].correct++;
             mastery[topic].level = Math.max(mastery[topic].level, level);
@@ -219,6 +246,66 @@ const OTBEcosystem = (() => {
             if (!p.gamesPlayed[source]) p.gamesPlayed[source] = 0;
             p.gamesPlayed[source]++;
 
+            // Detect a newly-mastered topic and emit a recentMastery event so the
+            // Hub dashboard can show real data instead of derived.
+            const accuracy = mastery[topic].total > 0
+                ? mastery[topic].correct / mastery[topic].total
+                : 0;
+            const nowMastered =
+                mastery[topic].total >= MASTERY_MIN_TOTAL &&
+                accuracy >= MASTERY_MIN_ACCURACY;
+
+            if (nowMastered && !wasMastered) {
+                mastery[topic].mastered = true;
+                if (!Array.isArray(p.recentMastery)) p.recentMastery = [];
+                p.recentMastery.unshift({
+                    topic,
+                    domain,
+                    game: source || null,
+                    masteredAt: Date.now()
+                });
+                // Keep ring buffer bounded
+                while (p.recentMastery.length > RECENT_MASTERY_MAX) p.recentMastery.pop();
+                try {
+                    if (typeof window !== 'undefined' && window.BBGAnalytics) {
+                        window.BBGAnalytics.event('mastered', { topic, domain, game: source || null });
+                    }
+                } catch (_) {}
+            }
+
+            _save(p);
+        },
+
+        /**
+         * Record a game launch event. Updates `games[gameId].lastPlayed` so the
+         * Hub dashboard can show "Played 3 days ago" using real data.
+         * Call this from each game's main.js on init.
+         */
+        recordGameLaunch(gameId) {
+            if (!gameId) return;
+            const p = _load();
+            if (!p.games || typeof p.games !== 'object') p.games = {};
+            if (!p.games[gameId]) p.games[gameId] = { launches: 0, xp: 0, lastPlayed: null };
+            p.games[gameId].launches = (p.games[gameId].launches || 0) + 1;
+            p.games[gameId].lastPlayed = Date.now();
+            _save(p);
+            try {
+                if (typeof window !== 'undefined' && window.BBGAnalytics) {
+                    window.BBGAnalytics.event('game_launch', { game: gameId });
+                }
+            } catch (_) {}
+        },
+
+        /**
+         * Record game-scoped XP (separate from globalXP). Useful so the
+         * Hub can show per-game progress bars without scanning mastery.
+         */
+        addGameXP(gameId, amount) {
+            if (!gameId || !amount) return;
+            const p = _load();
+            if (!p.games || typeof p.games !== 'object') p.games = {};
+            if (!p.games[gameId]) p.games[gameId] = { launches: 0, xp: 0, lastPlayed: null };
+            p.games[gameId].xp = (p.games[gameId].xp || 0) + amount;
             _save(p);
         },
 
@@ -344,6 +431,67 @@ const OTBEcosystem = (() => {
                 xpForNext: xpNeeded,
                 progress: xpRemaining / xpNeeded
             };
+        },
+
+        /**
+         * Read a JSON value scoped to the active profile.
+         * Falls back to legacy global key on first read so existing
+         * single-profile data is preserved.
+         * @param {string} suffix - e.g. 'pet', 'daily_challenges'
+         * @param {*} fallback - returned on read miss / parse failure
+         * @param {string} [legacyKey] - optional legacy raw key to migrate from
+         */
+        getScopedItem(suffix, fallback, legacyKey) {
+            if (typeof ProfileManager === 'undefined') {
+                // No profile manager available — emulate scoping with bbg_<suffix>
+                try {
+                    const raw = localStorage.getItem('bbg_' + suffix);
+                    return raw ? JSON.parse(raw) : (fallback !== undefined ? fallback : null);
+                } catch (_) { return fallback !== undefined ? fallback : null; }
+            }
+            const key = ProfileManager.getScopedKey(suffix);
+            try {
+                let raw = localStorage.getItem(key);
+                if (!raw && legacyKey) {
+                    // One-time migration from legacy raw key
+                    const legacy = localStorage.getItem(legacyKey);
+                    if (legacy) {
+                        localStorage.setItem(key, legacy);
+                        raw = legacy;
+                    }
+                }
+                if (!raw) return fallback !== undefined ? fallback : null;
+                return JSON.parse(raw);
+            } catch (e) {
+                console.warn('[BBG Ecosystem] getScopedItem failed for', suffix, e);
+                return fallback !== undefined ? fallback : null;
+            }
+        },
+
+        /**
+         * Write a JSON value scoped to the active profile.
+         */
+        setScopedItem(suffix, value) {
+            if (typeof ProfileManager === 'undefined') {
+                try { localStorage.setItem('bbg_' + suffix, JSON.stringify(value)); } catch (_) {}
+                return;
+            }
+            const key = ProfileManager.getScopedKey(suffix);
+            try { localStorage.setItem(key, JSON.stringify(value)); }
+            catch (e) { console.warn('[BBG Ecosystem] setScopedItem failed for', suffix, e); }
+        },
+
+        /**
+         * Persist arbitrary fields onto the active profile.
+         * Used by shop.js for purchasedItems / equippedItems so they
+         * write through the same profile-aware key as the rest of the
+         * ecosystem (instead of an old raw key).
+         */
+        updateProfile(patch) {
+            if (!patch || typeof patch !== 'object') return;
+            const p = _load();
+            Object.assign(p, patch);
+            _save(p);
         },
 
         /**

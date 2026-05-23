@@ -45,11 +45,34 @@ const HubChallenges = (() => {
         { id: 'play-15min', text: 'Play for 15 minutes', icon: '⏰', reward: 25, check: (s) => s.totalPlayTime >= (s._prevPlayTime || 0) + 900 },
     ];
 
+    // Legacy raw keys (kept for one-time migration). New code uses
+    // OTBEcosystem.getScopedItem('daily_challenges', ...) so the daily set
+    // is per-profile instead of shared across all players on the device.
     const STORAGE_KEY = 'otb_daily_challenges';
     const HISTORY_KEY = 'otb_daily_challenge_history';
 
+    // 20% chance to get a surprise coin bonus on challenge completion
+    // (variable reward layer per variable-reward-psychology.md). Bonus is
+    // a small 1.5x to 2.5x multiplier on top of the guaranteed reward.
+    const BONUS_CHANCE = 0.20;
+    const BONUS_MIN_MULT = 1.5;
+    const BONUS_MAX_MULT = 2.5;
+
     function _todayStr() {
         return new Date().toISOString().slice(0, 10);
+    }
+
+    function _loadDailyData() {
+        return OTBEcosystem.getScopedItem('daily_challenges', null, STORAGE_KEY);
+    }
+    function _saveDailyData(data) {
+        OTBEcosystem.setScopedItem('daily_challenges', data);
+    }
+    function _loadHistory() {
+        return OTBEcosystem.getScopedItem('daily_challenge_history', null, HISTORY_KEY);
+    }
+    function _saveHistory(hist) {
+        OTBEcosystem.setScopedItem('daily_challenge_history', hist);
     }
 
     function _seededRandom(seed) {
@@ -59,8 +82,7 @@ const HubChallenges = (() => {
 
     function getDailyChallenges() {
         const today = _todayStr();
-        let stored;
-        try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { stored = null; }
+        const stored = _loadDailyData();
 
         if (stored && stored.date === today) return stored;
 
@@ -91,7 +113,7 @@ const HubChallenges = (() => {
         };
 
         const data = { date: today, challenges: selected, snapshot };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        _saveDailyData(data);
         return data;
     }
 
@@ -116,29 +138,53 @@ const HubChallenges = (() => {
             if (poolItem && poolItem.check(checkState)) {
                 challenge.completed = true;
                 changed = true;
-                // Award coins
+
+                // Guaranteed base reward
                 OTBEcosystem.addCoins(challenge.reward, 'daily-challenge');
-                // Play challenge complete SFX
+
+                // Variable bonus reward (per variable-reward-psychology.md).
+                // Roll a 20% chance for a surprise multiplier on top of the
+                // base reward. Bonus is shown to the user.
+                let bonus = 0;
+                if (Math.random() < BONUS_CHANCE) {
+                    const mult = BONUS_MIN_MULT + Math.random() * (BONUS_MAX_MULT - BONUS_MIN_MULT);
+                    bonus = Math.max(1, Math.round(challenge.reward * (mult - 1)));
+                    OTBEcosystem.addCoins(bonus, 'daily-challenge-bonus');
+                }
+                challenge.bonus = bonus;
+
                 if (typeof HubSFX !== 'undefined') HubSFX.challengeComplete();
-                // Update history
+                // Confetti + toast feedback when bonus hits — anticipation/surprise loop.
+                if (bonus > 0 && typeof HubAnimations !== 'undefined') {
+                    setTimeout(() => {
+                        HubAnimations.showToast(`SURPRISE! +${bonus} bonus coins!`, '\u{1F31F}');
+                        HubAnimations.coinRain(bonus);
+                    }, 350);
+                }
+
+                try {
+                    if (window.BBGAnalytics) {
+                        window.BBGAnalytics.event('challenge_complete', { id: challenge.id, reward: challenge.reward, bonus });
+                    }
+                } catch (_) {}
+
                 _addToHistory();
             }
         }
 
         if (changed) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            _saveDailyData(data);
         }
 
         return data.challenges;
     }
 
     function _addToHistory() {
-        let hist;
-        try { hist = JSON.parse(localStorage.getItem(HISTORY_KEY)); } catch (e) { hist = null; }
+        let hist = _loadHistory();
         if (!hist) hist = { completed: 0, lastDate: null };
         hist.completed++;
         hist.lastDate = _todayStr();
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+        _saveHistory(hist);
     }
 
     function _getProgressForChallenge(challenge, snapshot) {

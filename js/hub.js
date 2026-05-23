@@ -254,11 +254,14 @@
         if (typeof OTBEcosystem === 'undefined') return;
         const profile = OTBEcosystem.getProfile();
         const today = new Date().toISOString().split('T')[0];
-        const lastLogin = localStorage.getItem('bbg_last_login_bonus');
+
+        // Profile-scoped so each player gets their own daily bonus tracking.
+        const stored = OTBEcosystem.getScopedItem('last_login_bonus', null, 'bbg_last_login_bonus');
+        const lastLogin = typeof stored === 'string' ? stored : (stored && stored.date) || null;
 
         if (lastLogin === today) return; // Already claimed today
 
-        localStorage.setItem('bbg_last_login_bonus', today);
+        OTBEcosystem.setScopedItem('last_login_bonus', today);
 
         // Calculate reward based on streak
         const streak = profile.dailyStreak || 1;
@@ -371,6 +374,9 @@
         ProfileManager.setActiveProfile(id);
         document.getElementById('profile-select').style.display = 'none';
         document.getElementById('hub').style.display = 'block';
+        if (window.BBGAnalytics) {
+            try { window.BBGAnalytics.event('profile_switch', { profile: id }); } catch (_) {}
+        }
         loadProfile();
         loadHomeTab();
         applyTheme();
@@ -556,13 +562,23 @@
         // Run profile migration on first load
         ProfileManager.migrateIfNeeded();
 
-        // Set game card URLs from config, add click SFX
+        // Set game card URLs from config, add click SFX, record launch
         document.querySelectorAll('[data-game]').forEach(card => {
             const gameId = card.dataset.game;
             if (typeof OTBConfig !== 'undefined') {
                 card.href = OTBConfig.getGameUrl(gameId);
             }
-            card.addEventListener('click', () => HubSFX.click());
+            card.addEventListener('click', () => {
+                HubSFX.click();
+                // Record the launch in the ecosystem so the dashboard gets
+                // real `lastPlayed` data instead of derived from mastery.
+                if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.recordGameLaunch) {
+                    try { OTBEcosystem.recordGameLaunch(gameId); } catch (_) {}
+                }
+                if (window.BBGAnalytics) {
+                    try { window.BBGAnalytics.event('hub_game_card_click', { game: gameId }); } catch (_) {}
+                }
+            });
         });
 
         // Inject music toggle button into header
@@ -665,8 +681,14 @@
 
         // Update nav
         document.querySelectorAll('.hub-nav-tab').forEach(t => {
-            t.classList.toggle('active', t.dataset.tab === tabId);
+            const active = t.dataset.tab === tabId;
+            t.classList.toggle('active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
+
+        if (window.BBGAnalytics) {
+            try { window.BBGAnalytics.event('tab_switch', { tab: tabId }); } catch (_) {}
+        }
 
         // Update content
         document.querySelectorAll('.hub-tab-content').forEach(c => {
@@ -861,7 +883,16 @@
         const levelEl = document.getElementById('player-level');
         if (levelEl) levelEl.textContent = `Lv. ${level.level}`;
         const xpFill = document.getElementById('xp-fill');
-        if (xpFill) xpFill.style.width = (level.progress * 100) + '%';
+        if (xpFill) {
+            const pct = Math.round(level.progress * 100);
+            xpFill.style.width = pct + '%';
+            // Update the parent progressbar's aria-valuenow for screen readers.
+            const xpBar = xpFill.parentElement;
+            if (xpBar && xpBar.setAttribute) {
+                xpBar.setAttribute('aria-valuenow', String(pct));
+                xpBar.setAttribute('aria-valuetext', `Level ${level.level}, ${pct} percent to next level`);
+            }
+        }
         const coinsEl = document.getElementById('coins-display');
         if (coinsEl) coinsEl.textContent = `🪙 ${profile.coins}`;
         const streakEl = document.getElementById('streak-display');
@@ -936,11 +967,7 @@
     document.addEventListener('DOMContentLoaded', init);
 })();
 
-// Global error handler for Hub resilience
-window.onerror = function(msg, source, line, col, error) {
-    console.error('Hub error:', msg, 'at', source, line + ':' + col);
-    return false;
-};
-window.addEventListener('unhandledrejection', function(event) {
-    console.error('Hub unhandled rejection:', event.reason);
-});
+// Note: global error / unhandledrejection handlers now live in
+// js/error-boundary.js (loaded first in index.html). This keeps the
+// boundary in one place and gives a consistent [bbg.err] log shape
+// across the Hub and games.

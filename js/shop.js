@@ -87,12 +87,15 @@ const HubShop = (() => {
         const result = OTBEcosystem.spendCoins(item.price);
         if (!result.success) return { success: false, reason: 'Not enough coins' };
 
-        // Add to purchased list
+        // Add to purchased list on the ACTIVE profile (not the legacy global key).
         const p = OTBEcosystem.getProfile();
-        if (!p.purchasedItems) p.purchasedItems = [];
-        p.purchasedItems.push(itemId);
-        p.updatedAt = Date.now();
-        localStorage.setItem('otb_shared_profile', JSON.stringify(p));
+        const purchasedItems = Array.isArray(p.purchasedItems) ? p.purchasedItems.slice() : [];
+        purchasedItems.push(itemId);
+        OTBEcosystem.updateProfile({ purchasedItems });
+
+        try {
+            if (window.BBGAnalytics) window.BBGAnalytics.event('shop_purchase', { item: itemId, price: item.price, type: item.type });
+        } catch (_) {}
 
         return { success: true, remaining: result.remaining };
     }
@@ -102,35 +105,39 @@ const HubShop = (() => {
         if (!item) return false;
 
         const p = OTBEcosystem.getProfile();
-        if (!p.equippedItems) p.equippedItems = { avatar: 'default', nameColor: 'gold', title: '', hubTheme: 'default' };
+        const equippedItems = Object.assign(
+            { avatar: 'default', nameColor: 'gold', title: '', hubTheme: 'default' },
+            p.equippedItems || {}
+        );
 
-        if (item.type === 'avatar') p.equippedItems.avatar = item.id;
-        else if (item.type === 'nameColor') p.equippedItems.nameColor = item.color || item.id;
-        else if (item.type === 'title') p.equippedItems.title = item.title || '';
-        else if (item.type === 'hubTheme') p.equippedItems.hubTheme = item.theme || 'default';
+        if (item.type === 'avatar') equippedItems.avatar = item.id;
+        else if (item.type === 'nameColor') equippedItems.nameColor = item.color || item.id;
+        else if (item.type === 'title') equippedItems.title = item.title || '';
+        else if (item.type === 'hubTheme') equippedItems.hubTheme = item.theme || 'default';
         else if (item.type === 'petAccessory') {
             if (typeof HubPet !== 'undefined') HubPet.equipAccessory(item.id);
             return true;
         }
 
-        p.updatedAt = Date.now();
-        localStorage.setItem('otb_shared_profile', JSON.stringify(p));
+        OTBEcosystem.updateProfile({ equippedItems });
         return true;
     }
 
     function unequip(type) {
         const p = OTBEcosystem.getProfile();
-        if (!p.equippedItems) return;
-        if (type === 'avatar') p.equippedItems.avatar = 'default';
-        else if (type === 'nameColor') p.equippedItems.nameColor = 'gold';
-        else if (type === 'title') p.equippedItems.title = '';
-        else if (type === 'hubTheme') p.equippedItems.hubTheme = 'default';
+        const equippedItems = Object.assign(
+            { avatar: 'default', nameColor: 'gold', title: '', hubTheme: 'default' },
+            p.equippedItems || {}
+        );
+        if (type === 'avatar') equippedItems.avatar = 'default';
+        else if (type === 'nameColor') equippedItems.nameColor = 'gold';
+        else if (type === 'title') equippedItems.title = '';
+        else if (type === 'hubTheme') equippedItems.hubTheme = 'default';
         else if (type === 'petAccessory') {
             if (typeof HubPet !== 'undefined') HubPet.equipAccessory(null);
             return;
         }
-        p.updatedAt = Date.now();
-        localStorage.setItem('otb_shared_profile', JSON.stringify(p));
+        OTBEcosystem.updateProfile({ equippedItems });
     }
 
     function getEquipped() {

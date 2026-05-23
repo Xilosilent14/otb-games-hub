@@ -162,10 +162,17 @@ const HubTrophies = (() => {
         if ((profile.purchasedItems || []).length > 0) earned['hub'].add('shop-first');
         if ((profile.pet || {}).mood >= 90) earned['hub'].add('pet-happy');
 
-        // Check completed daily challenges count
-        const dc = JSON.parse(localStorage.getItem('otb_daily_challenge_history') || '{"completed":0}');
-        if (dc.completed >= 3) earned['hub'].add('daily-3');
-        if (dc.completed >= 10) earned['hub'].add('daily-10');
+        // Check completed daily challenges count from profile-scoped history
+        let dc = { completed: 0 };
+        try {
+            dc = OTBEcosystem.getScopedItem(
+                'daily_challenge_history',
+                { completed: 0 },
+                'otb_daily_challenge_history'
+            ) || { completed: 0 };
+        } catch (_) {}
+        if ((dc.completed || 0) >= 3) earned['hub'].add('daily-3');
+        if ((dc.completed || 0) >= 10) earned['hub'].add('daily-10');
 
         return earned;
     }

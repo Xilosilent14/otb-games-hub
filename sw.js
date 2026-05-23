@@ -1,5 +1,5 @@
-// Blake Boys Gaming Hub — Service Worker v3.3
-const CACHE_NAME = 'bbg-hub-v20';
+// Blake Boys Gaming Hub — Service Worker v3.4
+const CACHE_NAME = 'bbg-hub-v21';
 const ASSETS = [
     './',
     './index.html',
@@ -10,6 +10,8 @@ const ASSETS = [
     './css/shared/fonts/fredoka-one.woff2',
     './css/shared/fonts/nunito-regular.woff2',
     './css/shared/fonts/nunito-semibold.woff2',
+    './js/error-boundary.js',
+    './js/analytics.js',
     './js/otb-config.js',
     './js/cloud-tts.js',
     './js/auto-update.js',
@@ -49,7 +51,8 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
     if (e.request.method !== 'GET') return;
-// Always fetch version.json from network (auto-update check)    if (e.request.url.includes('version.json') || e.request.url.includes('auto-update.js')) return;
+    // Always fetch version.json + auto-update.js from network (auto-update check)
+    if (e.request.url.includes('version.json') || e.request.url.includes('auto-update.js')) return;
     e.respondWith(
         caches.match(e.request).then(cached => {
             const fetchPromise = fetch(e.request).then(response => {

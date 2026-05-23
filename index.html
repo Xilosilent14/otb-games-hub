@@ -10,9 +10,11 @@
     <link rel="icon" type="image/png" href="assets/bbg-logo.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/shared/design-system.css?v=2">
-    <link rel="stylesheet" href="css/hub.css?v=7">
-    <link rel="stylesheet" href="css/hub-features.css?v=2">
-    <link rel="stylesheet" href="css/dashboard.css?v=1">
+    <link rel="stylesheet" href="css/hub.css?v=8">
+    <link rel="stylesheet" href="css/hub-features.css?v=3">
+    <link rel="stylesheet" href="css/dashboard.css?v=2">
+    <script src="js/error-boundary.js"></script>
+    <script src="js/analytics.js"></script>
 </head>
 <body>
     <!-- Splash Screen -->
@@ -52,8 +54,8 @@
             <img src="assets/bbg-logo.png" alt="BBG" class="profile-select-logo">
             <h1 class="profile-select-title">Who's Playing?</h1>
         </div>
-        <div class="profile-cards" id="profile-cards"></div>
-        <button class="otb-btn otb-btn-small profile-add-btn" id="add-profile-btn">+ Add Player</button>
+        <div class="profile-cards" id="profile-cards" role="list" aria-label="Player profiles"></div>
+        <button class="otb-btn otb-btn-small profile-add-btn" id="add-profile-btn" aria-label="Add a new player profile">+ Add Player</button>
     </div>
 
     <!-- Add Player Modal -->
@@ -87,15 +89,15 @@
             </div>
             <div class="hub-player">
                 <div class="hub-player-info">
-                    <div class="hub-avatar" id="player-avatar">😎</div>
+                    <div class="hub-avatar" id="player-avatar" aria-hidden="true">😎</div>
                     <div>
                         <span class="hub-player-name" id="player-name">Player</span>
-                        <span class="hub-player-level" id="player-level">Lv. 1</span>
-                        <button class="hub-profile-switch" id="switch-profile-btn" title="Switch player">Switch</button>
+                        <span class="hub-player-level" id="player-level" aria-label="Current level">Lv. 1</span>
+                        <button class="hub-profile-switch" id="switch-profile-btn" title="Switch player" aria-label="Switch to a different player profile">Switch</button>
                         <div class="hub-player-title" id="player-title"></div>
                     </div>
                 </div>
-                <div class="hub-xp-bar">
+                <div class="hub-xp-bar" role="progressbar" aria-label="Experience progress to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="hub-xp-fill" id="xp-fill" style="width: 0%"></div>
                 </div>
                 <div class="hub-stats-row" aria-live="polite">

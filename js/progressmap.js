@@ -27,15 +27,23 @@ const HubProgressMap = (() => {
         { id: 'legend', name: 'Legend', icon: '🌟', desc: 'Reach Level 25', level: 25, reward: 50 },
     ];
 
+    // Legacy raw key — migrated to a profile-scoped key on first read.
     const CLAIMED_KEY = 'bbg_milestone_rewards_claimed';
 
     function _getClaimed() {
+        if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.getScopedItem) {
+            return OTBEcosystem.getScopedItem('milestone_rewards_claimed', [], CLAIMED_KEY) || [];
+        }
         try { return JSON.parse(localStorage.getItem(CLAIMED_KEY)) || []; }
         catch (e) { return []; }
     }
 
     function _setClaimed(list) {
-        localStorage.setItem(CLAIMED_KEY, JSON.stringify(list));
+        if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.setScopedItem) {
+            OTBEcosystem.setScopedItem('milestone_rewards_claimed', list);
+        } else {
+            try { localStorage.setItem(CLAIMED_KEY, JSON.stringify(list)); } catch (_) {}
+        }
     }
 
     function checkMilestone(m, profile, summary) {

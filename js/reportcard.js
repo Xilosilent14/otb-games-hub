@@ -3,6 +3,8 @@
    Visual upgrade with stars, highlights, trends
    ============================================ */
 const HubReportCard = (() => {
+    // Legacy raw key — migrated to a profile-scoped key on first read so each
+    // player has their own weekly snapshot history.
     const STORAGE_KEY = 'otb_weekly_snapshots';
 
     function _todayStr() {
@@ -10,8 +12,19 @@ const HubReportCard = (() => {
     }
 
     function _getSnapshots() {
+        if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.getScopedItem) {
+            return OTBEcosystem.getScopedItem('weekly_snapshots', [], STORAGE_KEY) || [];
+        }
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
         catch (e) { return []; }
+    }
+
+    function _saveSnapshots(snapshots) {
+        if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.setScopedItem) {
+            OTBEcosystem.setScopedItem('weekly_snapshots', snapshots);
+        } else {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshots)); } catch (_) {}
+        }
     }
 
     // Take a daily snapshot (called on hub load, once per day)
@@ -43,7 +56,7 @@ const HubReportCard = (() => {
 
         // Keep last 30 days
         while (snapshots.length > 30) snapshots.shift();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshots));
+        _saveSnapshots(snapshots);
     }
 
     function getWeeklyStats() {

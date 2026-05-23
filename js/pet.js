@@ -3,6 +3,9 @@
    Growth stages, tricks, mood hearts, accessories
    ============================================ */
 const HubPet = (() => {
+    // Legacy raw key kept for one-time migration via OTBEcosystem.getScopedItem.
+    // Active reads/writes go through the profile-scoped key so Oliver's pet
+    // and Asher's pet are separate creatures.
     const PET_KEY = 'otb_pet_state';
 
     const MOODS = [
@@ -59,8 +62,9 @@ const HubPet = (() => {
     };
 
     function _getState() {
-        let pet;
-        try { pet = JSON.parse(localStorage.getItem(PET_KEY)); } catch (e) { pet = null; }
+        let pet = (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.getScopedItem)
+            ? OTBEcosystem.getScopedItem('pet_state', null, PET_KEY)
+            : null;
         if (!pet) {
             pet = {
                 body: PET_BODIES[0],
@@ -73,16 +77,21 @@ const HubPet = (() => {
                 hatched: Date.now(),
                 equippedAccessory: null
             };
-            localStorage.setItem(PET_KEY, JSON.stringify(pet));
+            _saveState(pet);
         }
-        // Migration: ensure totalPlayed exists
+        // Forward-compat migrations
         if (typeof pet.totalPlayed !== 'number') pet.totalPlayed = 0;
         if (!pet.equippedAccessory) pet.equippedAccessory = null;
+        if (typeof pet.hatched !== 'number') pet.hatched = Date.now();
         return pet;
     }
 
     function _saveState(pet) {
-        localStorage.setItem(PET_KEY, JSON.stringify(pet));
+        if (typeof OTBEcosystem !== 'undefined' && OTBEcosystem.setScopedItem) {
+            OTBEcosystem.setScopedItem('pet_state', pet);
+        } else {
+            try { localStorage.setItem(PET_KEY, JSON.stringify(pet)); } catch (_) {}
+        }
     }
 
     function getGrowthStage(pet) {
@@ -143,9 +152,27 @@ const HubPet = (() => {
         pet.mood = Math.min(100, pet.mood + 15);
         pet.lastFed = Date.now();
         pet.totalFed = (pet.totalFed || 0) + 1;
+
+        // Variable reward: 12% chance of a "surprise gift" — pet returns a
+        // small bonus of coins after a meal. Reinforces the feeding loop.
+        let coinGift = 0;
+        if (Math.random() < 0.12) {
+            coinGift = 3 + Math.floor(Math.random() * 4); // 3-6 coins back
+            OTBEcosystem.addCoins(coinGift, 'pet-gift');
+        }
+
         _saveState(pet);
 
-        return { success: true, newMood: pet.mood, trick: TRICKS[Math.floor(Math.random() * TRICKS.length)] };
+        try {
+            if (window.BBGAnalytics) window.BBGAnalytics.event('pet_feed', { mood: pet.mood, coinGift });
+        } catch (_) {}
+
+        return {
+            success: true,
+            newMood: pet.mood,
+            trick: TRICKS[Math.floor(Math.random() * TRICKS.length)],
+            coinGift
+        };
     }
 
     function playWithPet() {
@@ -233,25 +260,25 @@ const HubPet = (() => {
                 <div class="pet-mood-hearts">${_moodHearts(pet.mood)}</div>
             </div>
 
-            <div class="pet-actions">
-                <button class="pet-btn pet-btn-feed" ${coins < 5 ? 'disabled title="Need 5 coins"' : ''}>
-                    🍎 Feed (🪙5)
+            <div class="pet-actions" role="group" aria-label="Pet actions">
+                <button class="pet-btn pet-btn-feed" aria-label="Feed your pet (costs 5 coins)" ${coins < 5 ? 'disabled title="Need 5 coins"' : ''}>
+                    \u{1F34E} Feed (\u{1FA99}5)
                 </button>
-                <button class="pet-btn pet-btn-play">
-                    🎾 Play
+                <button class="pet-btn pet-btn-play" aria-label="Play with your pet">
+                    \u{1F3BE} Play
                 </button>
-                <button class="pet-btn pet-btn-customize">
+                <button class="pet-btn pet-btn-customize" aria-label="Customize your pet" aria-expanded="false" aria-controls="pet-customize-panel">
                     ✏️ Customize
                 </button>
             </div>
 
-            <div class="pet-customize-panel" style="display:none">
-                <div class="pet-body-picker">
-                    ${PET_BODIES.map(b => `<button class="pet-body-option ${b === pet.body ? 'selected' : ''}" data-body="${b}">${b}</button>`).join('')}
+            <div class="pet-customize-panel" id="pet-customize-panel" style="display:none" aria-label="Pet customization">
+                <div class="pet-body-picker" role="radiogroup" aria-label="Choose pet body">
+                    ${PET_BODIES.map(b => `<button class="pet-body-option ${b === pet.body ? 'selected' : ''}" data-body="${b}" role="radio" aria-checked="${b === pet.body ? 'true' : 'false'}" aria-label="Pet body ${b}">${b}</button>`).join('')}
                 </div>
                 <div class="pet-name-edit">
-                    <input class="pet-name-input" type="text" value="${pet.name}" maxlength="12" placeholder="Pet name">
-                    <button class="pet-name-save otb-btn otb-btn-small otb-btn-primary">Save</button>
+                    <input class="pet-name-input" type="text" value="${pet.name}" maxlength="12" placeholder="Pet name" aria-label="Pet name">
+                    <button class="pet-name-save otb-btn otb-btn-small otb-btn-primary" aria-label="Save pet name">Save</button>
                 </div>
             </div>
         </div>`;
@@ -280,15 +307,23 @@ const HubPet = (() => {
                 const result = feedPet();
                 if (result.success) {
                     if (typeof HubSFX !== 'undefined') HubSFX.petBoop();
-                    HubAnimations.showToast('Yum! Your pet feels better!', '🍎');
+                    HubAnimations.showToast('Yum! Your pet feels better!', '\u{1F34E}');
                     // Do a random trick
                     if (result.trick) _doTrick(container, result.trick);
+                    // Surprise coin gift feedback (variable reward)
+                    if (result.coinGift && result.coinGift > 0) {
+                        setTimeout(() => {
+                            HubAnimations.showToast(`Your pet brought you ${result.coinGift} coins!`, '\u{1FA99}');
+                            HubAnimations.coinRain(result.coinGift);
+                            if (typeof HubSFX !== 'undefined') HubSFX.coinCollect();
+                        }, 600);
+                    }
                     setTimeout(() => {
                         if (typeof refreshPet === 'function') refreshPet();
                         if (typeof refreshHub === 'function') refreshHub();
                     }, 1000);
                 } else {
-                    HubAnimations.showToast(result.reason, '😿');
+                    HubAnimations.showToast(result.reason, '\u{1F63F}');
                 }
             });
         }
