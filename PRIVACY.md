@@ -33,7 +33,7 @@ The apps need a network connection to load assets and, for some games, to read t
 
 | Request | What it does | What is sent |
 |---|---|---|
-| Loading the app | Downloads HTML/CSS/JS/images from `bbgaming.shutterbuzzent.com` | Standard browser request headers (IP, user agent). Logged briefly by our CDN (Cloudflare). |
+| Loading the app | Downloads HTML/CSS/JS/images from `games.unratedguild.com` | Standard browser request headers (IP, user agent). Logged briefly by our CDN (Cloudflare). |
 | Cloud TTS (text-to-speech) | Generates audio for prompts in some games | The text to speak (e.g. `"Find the letter A"`). No names, no profile IDs, no user-typed text. |
 | Version check | Polls `/version.json` to detect a new release | Nothing other than the standard request. |
 
@@ -75,7 +75,7 @@ If we ever add usage analytics to understand what kids enjoy, the implementation
 We hold no server-side data about players. To delete everything on your device:
 
 1. Open the device browser.
-2. Visit `bbgaming.shutterbuzzent.com`.
+2. Visit `games.unratedguild.com`.
 3. Open site settings → Clear data / Reset.
 4. Uninstall any PWA installs from the home screen.
 
